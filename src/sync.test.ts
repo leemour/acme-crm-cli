@@ -47,6 +47,25 @@ it("sync imports contacts and deals through the CRM port and invoices as proposa
   const won = await runCli(["personal", "deals", "list", "status:won", "--json"], { keyring, service })
   expect(won.json().items).toHaveLength(3)
 
+  const paged = await runCli(["personal", "deals", "list", "--limit", "10", "--page", "2", "--json"], {
+    keyring,
+    service,
+  })
+  expect(paged.json().items).toHaveLength(5)
+  const status = await runCli(["personal", "store", "status", "--json"], { keyring, service })
+  expect(status.json().items).toContainEqual(expect.objectContaining({ kind: "deal", stored: 15, state: "complete" }))
+  const pipelines = await runCli(["personal", "pipelines", "list", "--json"], { keyring, service })
+  const [sales] = pipelines.json().items as { ref: string; name: string }[]
+  expect(sales?.name).toBe("Sales")
+  const pipeline = await runCli(["personal", "pipelines", "show", sales?.ref ?? "", "--json"], { keyring, service })
+  expect(pipeline.code).toBe(0)
+  const stages = await runCli(["personal", "stages", "list", "--json"], { keyring, service })
+  expect(stages.json().items).toHaveLength(4)
+  const fields = await runCli(["personal", "fields", "list", "deals", "--all", "--json"], { keyring, service })
+  expect(fields.json().items).toEqual([])
+  const found = await runCli(["personal", "search", "all", "Northwind", "--json"], { keyring, service })
+  expect(found.code).toBe(0)
+
   const again = await runCli(["personal", "sync", "--json"], { keyring, service })
   expect(again.json().item).toMatchObject({ deals: 0, invoices: { created: 0, unchanged: 8 } })
 
@@ -73,6 +92,12 @@ it("contacts list pages through people, and contacts show adds their organizatio
   expect(page.code).toBe(0)
   expect(page.json()).toMatchObject({ page: { limit: 10, has_more: false } })
   expect(page.json().items).toHaveLength(5)
+
+  const all = await runCli(["personal", "contacts", "list", "--all", "--json"])
+  expect(all.json().items).toHaveLength(25)
+
+  const atOne = await runCli(["personal", "contacts", "list", "organization:org_01", "--json"])
+  expect((atOne.json().items as { id: string }[]).map((one) => one.id)).toEqual(["per_01", "per_11", "per_21"])
 
   const shown = await runCli(["personal", "contacts", "show", "per_01", "--json"])
   expect(shown.json().item).toMatchObject({

@@ -40,7 +40,12 @@ const listed = <T extends { updated_at: string }>(all: T[], query: Record<string
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) return refused("invalid_limit", String(query.limit))
   const offset = Number(query.page_token ?? 0)
   if (!Number.isInteger(offset) || offset < 0) return refused("invalid_page_token", String(query.page_token))
-  const matching = all.filter((one) => since === undefined || one.updated_at > since)
+  const matching = all.filter(
+    (one) =>
+      (since === undefined || one.updated_at > since) &&
+      (query.organization_id === undefined ||
+        ("organization_id" in one && one.organization_id === query.organization_id)),
+  )
   const page = matching.slice(offset, offset + limit)
   const newest = [since ?? "", ...all.map((one) => one.updated_at)].sort().at(-1)
   return {
@@ -78,7 +83,7 @@ export const fakeAcme = (options: FakeOptions = {}) => {
     { path: /^\/v1\/pipelines$/, query: [], answer: () => ({ status: 200, body: { pipelines: data.pipelines } }) },
     { path: /^\/v1\/organizations$/, query: LIST_QUERY, answer: (_, q) => listed(data.organizations, q) },
     { path: /^\/v1\/organizations\/([^/]+)$/, query: [], answer: (id) => found(data.organizations, id) },
-    { path: /^\/v1\/people$/, query: LIST_QUERY, answer: (_, q) => listed(data.people, q) },
+    { path: /^\/v1\/people$/, query: [...LIST_QUERY, "organization_id"], answer: (_, q) => listed(data.people, q) },
     { path: /^\/v1\/people\/([^/]+)$/, query: [], answer: (id) => found(data.people, id) },
     { path: /^\/v1\/deals$/, query: LIST_QUERY, answer: (_, q) => listed(data.deals, q) },
     { path: /^\/v1\/invoices$/, query: LIST_QUERY, answer: (_, q) => listed(data.invoices, q) },

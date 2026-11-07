@@ -7,7 +7,7 @@ ran it · ⛔ not tested offline, with the reason and where it is checked instea
 Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 [TESTING.md](TESTING.md) for how, and for the states and failures that cut across commands.
 
-**71 ✅ · 20 ⛔ · 0 ❌** — 32 commands, 59 options.
+**79 ✅ · 29 ⛔ · 0 ❌** — 39 commands, 69 options.
 
 | Command | Option | | Note |
 |---|---|---|---|
@@ -19,15 +19,32 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `session status` | `--check` | ✅ |  |
 | `session end` |  | ✅ |  |
 | `session list` |  | ✅ |  |
-| `comments list` |  | ✅ |  |
-| `comments list` | `--limit` | ✅ |  |
-| `comments list` | `--page` | ✅ |  |
-| `comments list` | `--all` | ✅ |  |
-| `comments show` |  | ✅ |  |
-| `comments create` |  | ✅ |  |
-| `comments create` | `--text` | ✅ |  |
-| `comments update` |  | ✅ |  |
-| `comments update` | `--text` | ✅ |  |
+| `sync` |  | ✅ |  |
+| `contacts list` |  | ✅ |  |
+| `contacts list` | `--limit` | ✅ |  |
+| `contacts list` | `--page` | ✅ |  |
+| `contacts list` | `--all` | ✅ |  |
+| `contacts show` |  | ✅ |  |
+| `store status` |  | ✅ |  |
+| `deals list` |  | ✅ |  |
+| `deals list` | `--limit` | ✅ |  |
+| `deals list` | `--page` | ✅ |  |
+| `deals show` |  | ✅ |  |
+| `pipelines list` |  | ✅ |  |
+| `pipelines show` |  | ✅ |  |
+| `stages list` |  | ✅ |  |
+| `fields list` |  | ✅ |  |
+| `fields list` | `--limit` | ⛔ | cli-core's CRM fields list; Acme CRM has no custom fields, so src/sync.test.ts sees only an empty list |
+| `fields list` | `--page` | ⛔ | cli-core's CRM fields list; Acme CRM has no custom fields, so src/sync.test.ts sees only an empty list |
+| `fields list` | `--all` | ✅ |  |
+| `search all` |  | ✅ |  |
+| `search all` | `--only` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
+| `search all` | `--source` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
+| `search all` | `--max-meetings` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
+| `search all` | `--limit` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
+| `search all` | `--page` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
+| `search all` | `--exact` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
+| `search all` | `--timezone` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
 | `doctor` |  | ✅ |  |
 | `doctor` | `--online` | ✅ |  |
 | `skill show` |  | ✅ |  |

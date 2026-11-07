@@ -76,7 +76,7 @@ const LISTS = {
   invoices: wireInvoice,
 } as const
 export type ListName = keyof typeof LISTS
-type ItemOf<K extends ListName> = v.InferOutput<(typeof LISTS)[K]>
+export type ItemOfList<K extends ListName> = v.InferOutput<(typeof LISTS)[K]>
 
 export interface Page<T> {
   items: T[]
@@ -97,14 +97,24 @@ export const acmeApi = (api: Transport) => ({
       since,
       page,
       limit = PAGE_SIZE,
-    }: { since?: string | null | undefined; page?: string | undefined; limit?: number },
-  ): Promise<Page<ItemOf<K>>> => {
+      organization,
+    }: {
+      since?: string | null | undefined
+      page?: string | undefined
+      limit?: number
+      /** People only: those who work for this organization. */
+      organization?: string | undefined
+    },
+  ): Promise<Page<ItemOfList<K>>> => {
     const answer = await api.get(
-      { path: name, query: { limit, page_token: page, updated_since: since ?? undefined } },
+      {
+        path: name,
+        query: { limit, page_token: page, updated_since: since ?? undefined, organization_id: organization },
+      },
       pageOf(LISTS[name]),
     )
     return {
-      items: answer.data as ItemOf<K>[],
+      items: answer.data as ItemOfList<K>[],
       removed: answer.deleted_ids,
       next: answer.next_page_token,
       cursor: answer.sync_token,

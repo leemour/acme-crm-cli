@@ -1,6 +1,6 @@
 ---
 name: leemour-acme-crm-cli
-description: Use acme-crm, a WireCat CLI started from cli-template, from an agent — find a command, run it with the owner's profile, read JSON answers. Use when a task needs acme-crm. Its one service is a made-up sample, Example Comments.
+description: Use acme-crm, an example WireCat CLI for Acme CRM (a made-up service with synthetic data), from an agent — sync contacts, deals and invoices into the local store, list deals, show a contact, read JSON answers. Use when a task needs Acme CRM data.
 metadata:
   openclaw:
     requires:
@@ -21,6 +21,14 @@ Find your way with the tool itself, not this file:
 - `acme-crm commands --json` is the full command tree; `acme-crm commands config --json` one group.
 - `acme-crm help config set` is one command's help, with what it returns.
 - `acme-crm doctor --json` says what is set up on this computer.
+
+## Common tasks
+
+- `acme-crm personal sync --json` copies organizations, people and deals into the local WireCat store, and imports
+  invoices as `invoice:` proposals the owner confirms. Run it first; a second run fetches only what changed.
+- `acme-crm personal deals list status:open --json` lists the synced deals; `deals show deal:<id>` shows one.
+- `acme-crm personal contacts list --json` and `contacts show per_01 --json` read people live from the service.
+- `acme-crm personal store status --json` says how far each kind's sync is.
 
 ## Rules
 

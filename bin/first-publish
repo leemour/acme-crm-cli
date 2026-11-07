@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# The owner's first publish of @leemour/acme-crm-cli, from this computer: npm lets a trusted publisher be set only on
+# a package that exists. Every later version goes out through .github/workflows/release.yml (bin/release).
+# Runs from any directory; the token npm login keeps is never read or printed here.
+set -euo pipefail
+
+root=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
+cd "$root"
+
+name=$(node -p 'require("./package.json").name')
+version=$(node -p 'require("./package.json").version')
+
+[ "$(git branch --show-current)" = "main" ] || { echo "first-publish: switch to main first" >&2; exit 1; }
+[ -z "$(git status --porcelain)" ] || { echo "first-publish: commit or stash your changes first" >&2; exit 1; }
+
+# Its registry URL can carry a token in an error, so npm's own error output stays hidden.
+if npm view "$name" version >/dev/null 2>&1; then
+  echo "first-publish: $name is already on npm; release with $root/bin/release instead" >&2
+  exit 1
+fi
+
+if ! user=$(npm whoami 2>/dev/null); then
+  echo "Not signed in to npm: npm login opens the browser."
+  npm login
+  user=$(npm whoami 2>/dev/null)
+fi
+echo "Publishing $name@$version as npm user $user"
+
+pnpm install --frozen-lockfile
+pnpm build
+npm publish --access public
+
+cat <<EOF
+
+Published $name@$version: https://www.npmjs.com/package/$name
+
+Now let GitHub Actions publish the next versions, within two days of saving this:
+  1. Open https://www.npmjs.com/package/$name/access
+     (or npmjs.com > Packages > $name > Settings > Trusted publishing)
+  2. Under "Select your publisher" choose GitHub Actions and enter:
+       Organization or user:  leemour
+       Repository:            acme-crm-cli
+       Workflow filename:     release.yml
+       Environment name:      npm
+     and allow "npm publish" among the allowed actions: release.yml runs npm publish.
+  3. In GitHub, create the environment "npm" limited to the main branch, and make the repository public:
+     npm makes no provenance record for a private one, and WireCat Desktop checks that record.
+
+This hand-published $version has no provenance; the first one from release.yml will.
+EOF

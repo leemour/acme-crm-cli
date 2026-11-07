@@ -50,4 +50,15 @@ export const UNTESTED: { command: string; option?: string; reason: string }[] = 
     ...(option ? { option } : {}),
     reason: `starts the installed CLI as a child process, as the agent would; ${SHARED_MCP}`,
   })),
+  ...["--only", "--source", "--max-meetings", "--limit", "--page", "--exact", "--timezone"].map((option) => ({
+    command: "search all",
+    option,
+    reason:
+      "cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store",
+  })),
+  ...["--limit", "--page"].map((option) => ({
+    command: "fields list",
+    option,
+    reason: "cli-core's CRM fields list; Acme CRM has no custom fields, so src/sync.test.ts sees only an empty list",
+  })),
 ]

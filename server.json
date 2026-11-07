@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "dev.wirecat/acme-crm-cli",
-  "title": "WireCat acme-crm",
-  "description": "acme-crm for agents over MCP. Set up a profile with the acme-crm CLI first.",
-  "websiteUrl": "https://wirecat.dev/en/docs/acme-crm",
+  "name": "io.github.leemour/acme-crm-cli",
+  "title": "Acme CRM example",
+  "description": "An example WireCat CLI for a made-up CRM, synthetic data. Sign a profile in with acme-crm first.",
+  "websiteUrl": "https://github.com/leemour/acme-crm-cli#readme",
   "repository": {
     "url": "https://github.com/leemour/acme-crm-cli",
     "source": "github"

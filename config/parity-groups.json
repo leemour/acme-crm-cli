@@ -1,0 +1,8 @@
+[
+  {
+    "name": "crm-community",
+    "members": ["acme-crm", "b24"],
+    "covers": ["deals"],
+    "differences": []
+  }
+]

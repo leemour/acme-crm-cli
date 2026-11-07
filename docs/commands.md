@@ -140,8 +140,12 @@ read the people in Acme CRM
 list the people in Acme CRM, a page at a time
 
 ```sh
-acme-crm contacts list [options]
+acme-crm contacts list [query] [options]
 ```
+
+| Argument | | What it is |
+|---|---|---|
+| `query` | optional | field:value terms that narrow the list — the fields are below. |
 
 | Option | What it does |
 |---|---|
@@ -151,7 +155,7 @@ acme-crm contacts list [options]
 
 **Returns:** acme contact — id, name, email, phone, organization, updated_at; every field: acme-crm commands info contacts list
 
-**Example:** `acme-crm personal contacts list`, `acme-crm personal contacts list --json=id,name,email`
+**Example:** `acme-crm personal contacts list`, `acme-crm personal contacts list organization:org_01 --json=id,name`
 
 ### `acme-crm contacts show`
 

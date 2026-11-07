@@ -1,4 +1,4 @@
-acme-crm — a new WireCat CLI, started from cli-template
+acme-crm — an example third-party WireCat CLI for Acme CRM, a made-up service with synthetic data
 
 Usage: acme-crm <profile> <command> [options]
 Account commands start with your profile, a name you choose; none is ever assumed.

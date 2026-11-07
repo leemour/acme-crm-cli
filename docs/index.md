@@ -1,8 +1,8 @@
 # acme-crm
 
-`acme-crm` is a WireCat command-line tool for the terminal, for scripts and for AI agents. Its one service is a sample,
-Example Comments, made up to show how a command reaches a service; its address never resolves.
+`acme-crm` is an example WireCat command-line tool for Acme CRM, a made-up service, for the terminal, for scripts and
+for AI agents. Without `ACME_CRM_BASE_URL` it answers from a built-in fake that holds synthetic data only.
 
 It has the commands every WireCat CLI shares: `doctor`, `commands`, `config`, `skill`, `mcp`, `runs` and `upgrade`,
-and the sample's `session` and `comments`.
+and its own `session`, `sync`, `contacts`, `deals`, `pipelines`, `stages`, `store` and `search`.
 Start with [installation](installation.md), then [usage](usage.md).

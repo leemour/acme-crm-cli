@@ -7,10 +7,13 @@ import {
   outputFor,
   pagedList,
   pageOf,
+  queryTerms,
   REMOTE_READ,
   renderAnswer,
   runBudgetOf,
+  termField,
   withPaging,
+  withQuery,
 } from "@wirecat/cli-core/cli"
 import { type CrmSyncReport, syncCrm } from "@wirecat/cli-core/crm"
 import { addCrmCommands, type CrmRun } from "@wirecat/cli-core/crm/cli"
@@ -18,7 +21,7 @@ import { type IngestReceipt, ingest } from "@wirecat/cli-core/services"
 import type { AccountKey, MessageStore } from "@wirecat/cli-core/store"
 import { Command } from "commander"
 import * as v from "valibot"
-import type { AcmeApi, Invoice, Person } from "../acme/api.js"
+import type { AcmeApi, ItemOfList, ListName, Page, Person } from "../acme/api.js"
 import { acmeCrmSource, PROVIDER } from "../acme/crm-source.js"
 import { invoicesEnvelope } from "../acme/invoices.js"
 import { SERVICE } from "../acme/transport.js"
@@ -69,15 +72,19 @@ const openProfile = async (command: Command, { readOnly }: { readOnly: boolean }
   return { profile, account, store, env, source: () => source, close: () => store.close() }
 }
 
-const allInvoices = async (api: AcmeApi): Promise<Invoice[]> => {
-  const invoices: Invoice[] = []
+/** --all and sync walk pages until the service has no more, at most this many, so a huge account cannot hold the run. */
+const MOST_PAGES = 20
+
+const everyPage = async <K extends ListName>(api: AcmeApi, name: K, organization?: string) => {
+  const items: Page<ItemOfList<K>>["items"] = []
   let page: string | undefined
-  do {
-    const found = await api.list("invoices", { page })
-    for (const invoice of found.items) invoices.push(invoice)
-    page = found.next ?? undefined
-  } while (page)
-  return invoices
+  for (let turn = 0; turn < MOST_PAGES; turn++) {
+    const found = await api.list(name, { page, organization })
+    for (const item of found.items) items.push(item)
+    if (!found.next) return { items, has_more: false }
+    page = found.next
+  }
+  return { items, has_more: true }
 }
 
 const syncSchema = v.strictObject({
@@ -138,6 +145,7 @@ const syncCommand = () =>
     "acme_sync",
     syncSchema,
   )
+    .summary(`copy ${SERVICE} contacts and deals into the store, invoices as proposals`)
     .description(
       `bring the local copy of ${SERVICE} up to date: organizations, people and deals through the CRM sync, then ` +
         "invoices as proposals the owner confirms; a second run fetches only what changed",
@@ -156,7 +164,8 @@ const syncCommand = () =>
             account,
             { budget: runBudgetOf(this) },
           )
-          const envelope = invoicesEnvelope(account.account, `sync-${Date.now()}`, await allInvoices(api))
+          const { items: invoices } = await everyPage(api, "invoices")
+          const envelope = invoicesEnvelope(account.account, `sync-${Date.now()}`, invoices)
           return syncAnswer(report, await ingest(store, envelope, { account: account.account }))
         } finally {
           await store.close()
@@ -190,28 +199,44 @@ const contactOf = (
   updated_at: person.updated_at,
 })
 
+/** Acme filters people by organization itself; nothing is filtered in memory (WC-CMD-20). */
+const CONTACTS_QUERY = {
+  entity: "acme_contact",
+  backend: "native",
+  fields: [termField("organization", "kw", "organization:org_01")],
+} as const
+
 const contactsList = () =>
   withPaging(
-    answerEntity(
-      annotate(new Command("list"), {
-        effects: REMOTE_READ,
-        offline: false,
-        examples: [`${CLI} personal contacts list`, `${CLI} personal contacts list --json=id,name,email`],
-      }),
-      "acme_contact",
-      contactSchema,
+    withQuery(
+      answerEntity(
+        annotate(new Command("list"), {
+          effects: REMOTE_READ,
+          offline: false,
+          examples: [
+            `${CLI} personal contacts list`,
+            `${CLI} personal contacts list organization:org_01 --json=id,name`,
+          ],
+        }),
+        "acme_contact",
+        contactSchema,
+      ),
+      CONTACTS_QUERY,
     ),
   )
     .description(`list the people in ${SERVICE}, a page at a time`)
-    .action(async function (this: Command) {
+    .action(async function (this: Command, words: string[]) {
       const path = commandPath(this)
+      const organization = queryTerms(words, CONTACTS_QUERY, path).get("organization")
       const { settings } = contextOf(this)
       const { limit, offset } = pageOf(settings)
-      const found = await withService(this, (api) =>
-        api.list("people", { limit: Math.min(limit, 100), page: String(offset) }),
-      )
+      const found = await withService(this, async (api) => {
+        if (settings.all) return everyPage(api, "people", organization)
+        const one = await api.list("people", { limit: Math.min(limit, 100), page: String(offset), organization })
+        return { items: one.items, has_more: one.next !== null }
+      })
       const items = found.items.map((person) => contactOf(person, null))
-      renderAnswer(this, outputFor(this), pagedList(path, settings, { items, has_more: found.next !== null }))
+      renderAnswer(this, outputFor(this), pagedList(path, settings, { items, has_more: found.has_more }))
     })
 
 const contactsShow = () =>
