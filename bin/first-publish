@@ -43,8 +43,13 @@ Now let GitHub Actions publish the next versions, within two days of saving this
        Workflow filename:     release.yml
        Environment name:      npm
      and allow "npm publish" among the allowed actions: release.yml runs npm publish.
-  3. In GitHub, create the environment "npm" limited to the main branch, and make the repository public:
-     npm makes no provenance record for a private one, and WireCat Desktop checks that record.
+  3. In GitHub: keep the repository public (npm makes no provenance record for a private one, and WireCat Desktop
+     checks that record); create the environment "npm" limited to the main branch; once CI has run on main, add a
+     ruleset on main (no deletion, no force push, pull requests only, no bypass) requiring the checks standards,
+     changelog / guard, validation / ci / check, validation / ci / bun, validation / ci / secrets,
+     validation / prose, validation / version, validation / node-22, validation / repo-setup and conformance.
+     CI's repo-setup job, which release.yml runs, fails until that ruleset exists.
+  4. Release the next version with $root/bin/release
 
 This hand-published $version has no provenance; the first one from release.yml will.
 EOF

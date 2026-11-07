@@ -1,12 +1,10 @@
 import { existsSync } from "node:fs"
-import { homedir } from "node:os"
+import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { memoryKeyring } from "@wirecat/cli-base"
 import { expect, it } from "vitest"
 import { FAKE_TOKEN, fakeAcme } from "./acme/fake.js"
 import { runCli } from "./testing/harness.js"
-
-const REAL_STORE = join(homedir(), ".local", "share", "WireCat", "wirecat.db")
 
 const signedInFresh = async () => {
   const keyring = memoryKeyring()
@@ -19,7 +17,8 @@ const signedInFresh = async () => {
 
 it("sync imports contacts and deals through the CRM port and invoices as proposals, into the test store", async () => {
   const store = process.env.MESSAGING_STORE ?? ""
-  expect(store).not.toBe(REAL_STORE)
+  expect(store.startsWith(tmpdir())).toBe(true)
+  expect(store).not.toContain(join(".local", "share", "WireCat"))
   const { keyring, service } = await signedInFresh()
 
   const first = await runCli(["personal", "sync", "--json"], { keyring, service })

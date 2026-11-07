@@ -15,7 +15,9 @@ It shows the pieces a real tool needs:
 
 ## Install
 
-In WireCat Desktop, add the community tool `@leemour/acme-crm-cli`. Or from a terminal:
+WireCat Desktop plans to take a community tool it has not checked, such as `@leemour/acme-crm-cli`, once its owner
+turns that on; it checks the package's provenance record, which only versions published by `release.yml` carry.
+Until then, install it from a terminal:
 
 ```sh
 npm install -g @leemour/acme-crm-cli
