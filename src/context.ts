@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs"
 import { CliError } from "@wirecat/cli-base"
 import {
+  accountFileFor,
   type BaseEnvironment,
   baseContext,
   type EventSink,
@@ -8,10 +10,11 @@ import {
 } from "@wirecat/cli-core/cli"
 import { Pacer, pacePathFor } from "@wirecat/cli-core/sends"
 import type { Command } from "commander"
+import { type AcmeApi, acmeApi } from "./acme/api.js"
+import { fakeAcme } from "./acme/fake.js"
+import { SERVICE, transport } from "./acme/transport.js"
 import { configuration } from "./config.js"
 import { IDENTITY } from "./identity.js"
-import { type CommentsService, commentsService } from "./sample/comments.js"
-import { SERVICE, transport } from "./sample/transport.js"
 import { tokenStore } from "./token.js"
 
 /** What a test hands `run()` beside cli-core's own: the fake service in place of the network (WC-ARCH-10). */
@@ -19,7 +22,9 @@ export interface ServiceEnvironment extends BaseEnvironment {
   fetch?: typeof fetch
 }
 
-// SAMPLE: your service's documented limit; this one is made up.
+export const BASE_URL_VARIABLE = `${IDENTITY.envPrefix}_BASE_URL`
+
+// Acme CRM is made up; this pace is the fake's, so the example shows where a real service's documented limit goes.
 const PACE = { perMinute: 120, burst: 20 }
 
 /**
@@ -44,15 +49,21 @@ export const refuseOffline = (flags: GlobalFlags) => {
     throw new CliError("permission_error", `this needs ${SERVICE}; leave out --offline`, { reason: "offline.refused" })
 }
 
+/** With no base URL the CLI talks to the built-in fake, so the example works with no service behind it. */
+const fetchFor = (env: NodeJS.ProcessEnv, injected: typeof fetch | undefined) =>
+  injected ?? (env[BASE_URL_VARIABLE] ? fetch : fakeAcme().fetch)
+
 /** The service for one run, with the token it was given; `events` comes from `run()`, so each request is recorded. */
-export const serviceFor = (command: Command, token: string, events: EventSink) => {
+export const serviceFor = (command: Command, token: string, events?: EventSink): AcmeApi => {
   const { environment, env, profile } = contextOf(command)
-  return commentsService(
+  const baseUrl = env[BASE_URL_VARIABLE]
+  return acmeApi(
     transport({
       token,
-      events,
+      ...(baseUrl ? { baseUrl } : {}),
+      fetch: fetchFor(env, environment.fetch),
       signal: environment.signal,
-      ...(environment.fetch ? { fetch: environment.fetch } : {}),
+      ...(events ? { events } : {}),
       pacer: new Pacer(pacePathFor(IDENTITY, profile, env), PACE),
     }),
   )
@@ -64,15 +75,39 @@ export const tokenOf = (command: Command): string => {
   refuseOffline(flags)
   const saved = tokens.read(profile)
   if (!saved)
-    throw new CliError("authentication_error", `profile ${profile} is not signed in — run ${signInWords(profile)}`)
+    throw new CliError("authentication_error", `profile ${profile} is not signed in — run ${signInWords(profile)}`, {
+      reason: "auth.failed",
+    })
   return saved.secret
 }
 
 /**
- * Every remote call goes through here: inside cli-core's run, so `--timeout` bounds it, a failure or `--record` keeps
- * a run named after the command, and the transport's requests land in that run (WC-LIFE-5, WC-LIFE-15).
+ * Every remote call outside the CRM commands goes through here: inside cli-core's run, so `--timeout` bounds it, a
+ * failure or `--record` keeps a run named after the command, and the requests land in that run.
  */
-export const withService = <T>(command: Command, body: (service: CommentsService) => Promise<T>): Promise<T> => {
+export const withService = <T>(command: Command, body: (service: AcmeApi) => Promise<T>): Promise<T> => {
   const token = tokenOf(command)
   return contextOf(command).run((events) => body(serviceFor(command, token, events)))
+}
+
+/** The workspace `session start` saw, so a store read needs no request (cli-core does not export its reader). */
+export const recalledWorkspace = (command: Command): string | undefined => {
+  const { env, profile } = contextOf(command)
+  try {
+    const { account } = JSON.parse(readFileSync(accountFileFor(IDENTITY, profile, env), "utf8")) as {
+      account?: unknown
+    }
+    return typeof account === "string" ? account : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export const workspaceOf = (command: Command): string => {
+  const workspace = recalledWorkspace(command)
+  if (workspace) return workspace
+  const { profile } = contextOf(command)
+  throw new CliError("authentication_error", `profile ${profile} is not signed in — run ${signInWords(profile)}`, {
+    reason: "auth.failed",
+  })
 }

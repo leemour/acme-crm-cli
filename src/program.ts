@@ -18,11 +18,11 @@ import {
 } from "@wirecat/cli-core/cli"
 import { appUpdate } from "@wirecat/cli-core/update"
 import type { Command } from "commander"
-import { commentsCommand } from "./commands/comments.js"
+import { SERVICE } from "./acme/transport.js"
+import { acmeCommands } from "./commands/acme.js"
 import { sessionCommand } from "./commands/session.js"
 import { configuration } from "./config.js"
 import { IDENTITY, PACKAGE, SKILL } from "./identity.js"
-import { SERVICE } from "./sample/transport.js"
 import { holdsToken } from "./token.js"
 
 const update = appUpdate({
@@ -43,9 +43,8 @@ const mcpCommand = () => {
   let keyring: KeyringStore | undefined
   const mcp = appMcpCommand(IDENTITY, configuration, {
     name: SERVICE,
-    // SAMPLE: name the kinds of text other people wrote that your answers carry (WC-MCP-11).
-    untrusted: ["comment text", "author names"],
-    permissionExample: "comments.create=deny",
+    untrusted: ["contact, organization and deal names", "deal titles", "invoice line descriptions"],
+    permissionExample: "contacts.show=deny",
     skill: SKILL,
     signedIn: (profile, env) => holdsToken(env, profile, keyring),
   })
@@ -61,7 +60,7 @@ export const definition = (): ProgramDefinition => ({
   commands: () => [
     commandsCommand(IDENTITY),
     sessionCommand(),
-    commentsCommand(),
+    ...acmeCommands(),
     appDoctorCommand(IDENTITY, configuration, { packageName: PACKAGE }),
     skillCommand(IDENTITY, SKILL),
     mcpCommand(),

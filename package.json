@@ -1,7 +1,7 @@
 {
   "name": "@leemour/acme-crm-cli",
   "version": "0.0.0",
-  "description": "A new WireCat CLI, started from cli-template",
+  "description": "An example third-party WireCat CLI: Acme CRM contacts, deals and invoices, synthetic data only",
   "license": "Apache-2.0",
   "author": "Viacheslav Ptsarev",
   "repository": {

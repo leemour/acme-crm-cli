@@ -1,7 +1,7 @@
 {
   "wcat_manifest": 2,
   "name": "acme-crm",
-  "description": "a new WireCat CLI, started from cli-template",
+  "description": "an example third-party WireCat CLI for Acme CRM, a made-up service with synthetic data",
   "docs_url": "https://github.com/leemour/acme-crm-cli#readme",
   "package": "@leemour/acme-crm-cli",
   "bin": "wcat-acme-crm",
@@ -67,47 +67,123 @@
     },
     {
       "path": [
-        "comments",
+        "sync"
+      ],
+      "effects": {
+        "remote": "read",
+        "local": "write"
+      },
+      "permission": "sync"
+    },
+    {
+      "path": [
+        "contacts",
         "list"
       ],
       "effects": {
         "remote": "read",
         "local": "read"
       },
-      "permission": "comments.list"
+      "permission": "contacts.list"
     },
     {
       "path": [
-        "comments",
+        "contacts",
         "show"
       ],
       "effects": {
         "remote": "read",
         "local": "read"
       },
-      "permission": "comments.show"
+      "permission": "contacts.show"
     },
     {
       "path": [
-        "comments",
-        "create"
+        "store",
+        "status"
       ],
       "effects": {
-        "remote": "write",
-        "local": "write"
+        "remote": "none",
+        "local": "read"
       },
-      "permission": "comments.create"
+      "permission": "store.status"
     },
     {
       "path": [
-        "comments",
-        "update"
+        "deals",
+        "list"
       ],
       "effects": {
-        "remote": "write",
-        "local": "write"
+        "remote": "none",
+        "local": "read"
       },
-      "permission": "comments.update"
+      "permission": "deals.list"
+    },
+    {
+      "path": [
+        "deals",
+        "show"
+      ],
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "deals.show"
+    },
+    {
+      "path": [
+        "pipelines",
+        "list"
+      ],
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "pipelines.list"
+    },
+    {
+      "path": [
+        "pipelines",
+        "show"
+      ],
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "pipelines.show"
+    },
+    {
+      "path": [
+        "stages",
+        "list"
+      ],
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "stages.list"
+    },
+    {
+      "path": [
+        "fields",
+        "list"
+      ],
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "fields.list"
+    },
+    {
+      "path": [
+        "search",
+        "all"
+      ],
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "search.all"
     },
     {
       "path": [
@@ -322,7 +398,7 @@
     }
   ],
   "desktop": {
-    "tagline": "A new WireCat CLI, started from cli-template",
+    "tagline": "Example CRM: Acme contacts, deals and invoices",
     "profiles": {
       "args": [
         "session",
@@ -365,8 +441,8 @@
       "start"
     ],
     "signIn": {
-      "gives": "Lets your agent read and change your account through acme-crm.",
-      "asks": "An API token or key from the service."
+      "gives": "Lets your agent read the Acme CRM workspace: contacts, deals and invoices.",
+      "asks": "An Acme CRM API token. The example takes any acme_test_ token."
     },
     "skill": {
       "status": [
@@ -436,7 +512,27 @@
       ]
     },
     "tasks": null,
-    "sync": null,
+    "sync": {
+      "run": [
+        "{profile}",
+        "sync",
+        "--record",
+        "--json"
+      ],
+      "last": [
+        "runs",
+        "list",
+        "command:sync",
+        "status:success",
+        "--limit",
+        "50",
+        "--no-record",
+        "--json"
+      ],
+      "lastShape": "runs",
+      "what": "contacts, deals and invoices",
+      "note": null
+    },
     "storeInfo": null,
     "storeTables": null,
     "storeTableSizes": null,

@@ -1,10 +1,10 @@
 import { Readable } from "node:stream"
 import { type KeyringStore, memoryKeyring } from "@wirecat/cli-base"
 import type { RunOptions } from "@wirecat/cli-core/cli"
+import { FAKE_TOKEN, fakeAcme } from "../acme/fake.js"
 import type { ServiceEnvironment } from "../context.js"
 import { IDENTITY } from "../identity.js"
 import { run } from "../program.js"
-import { FAKE_TOKEN, fakeComments } from "./fake-comments.js"
 
 /** A keyring where profile `personal` is already signed in to the fake service; never the real one (WC-TEST-2). */
 export const signedIn = (): KeyringStore => memoryKeyring({ [`${IDENTITY.appName}:token:personal`]: FAKE_TOKEN })
@@ -21,13 +21,13 @@ export interface Ran {
 export const runCli = async (
   argv: string[],
   {
-    service = fakeComments(),
+    service = fakeAcme(),
     keyring = signedIn(),
     stdin,
     env,
     answer,
   }: {
-    service?: ReturnType<typeof fakeComments>
+    service?: ReturnType<typeof fakeAcme>
     keyring?: KeyringStore
     stdin?: string
     env?: NodeJS.ProcessEnv

@@ -3,10 +3,10 @@ import { join } from "node:path"
 import type { RunOptions } from "@wirecat/cli-core/cli"
 import { mcpOverStdio } from "@wirecat/cli-core/testing"
 import { expect, it } from "vitest"
+import { fakeAcme } from "./acme/fake.js"
 import type { ServiceEnvironment } from "./context.js"
 import { IDENTITY } from "./identity.js"
 import { run } from "./program.js"
-import { fakeComments } from "./testing/fake-comments.js"
 import { runCli, signedIn } from "./testing/harness.js"
 
 it("mcp serve offers search, read and write, and runs a command through the CLI", async () => {
@@ -21,23 +21,23 @@ it("mcp serve offers search, read and write, and runs a command through the CLI"
 })
 
 it("mcp serve refuses a --permission that names no command, and a --profiles this computer lacks", async () => {
-  const unknown = await runCli(["personal", "mcp", "serve", "--permission", "comments.nope=deny"])
+  const unknown = await runCli(["personal", "mcp", "serve", "--permission", "contacts.nope=deny"])
   expect(unknown.code).toBe(2)
-  expect(unknown.err).toContain("comments.nope")
+  expect(unknown.err).toContain("contacts.nope")
   const missing = await runCli(["mcp", "serve", "--profiles", "nope"])
   expect(missing.code).toBe(2)
   expect(missing.err).toContain("nope")
 })
 
 it("mcp config prints an entry that serves the named profile, or every profile only when told", async () => {
-  const one = await runCli(["personal", "mcp", "config", "--permission", "comments.create=deny", "--json"])
+  const one = await runCli(["personal", "mcp", "config", "--permission", "contacts.show=deny", "--json"])
   const entry = one.json().item as { config: { mcpServers: Record<string, { args: string[] }> } }
   expect(entry.config.mcpServers["acme-crm-personal"]?.args.slice(-5)).toEqual([
     "personal",
     "mcp",
     "serve",
     "--permission",
-    "comments.create=deny",
+    "contacts.show=deny",
   ])
   const all = await runCli(["mcp", "config", "--profiles", "all", "--json"])
   expect(JSON.stringify(all.json())).toContain('"--profiles","all"')
@@ -58,21 +58,21 @@ it("doctor --online answers even when npm cannot be reached", async () => {
 it("a denied command is offered as unavailable and refused before any request (WC-PERM-23)", async () => {
   const file = join(process.env.ACME_CRM_CONFIG_DIR ?? "", "config.json")
   mkdirSync(join(file, ".."), { recursive: true })
-  writeFileSync(file, JSON.stringify({ profiles: { personal: { permissions: { "comments.list": "deny" } } } }))
-  const service = fakeComments()
+  writeFileSync(file, JSON.stringify({ profiles: { personal: { permissions: { "contacts.list": "deny" } } } }))
+  const service = fakeAcme()
   const options: RunOptions & ServiceEnvironment = { tty: false, keyring: signedIn(), fetch: service.fetch }
   const mcp = await mcpOverStdio((streams) => run(["personal", "mcp", "serve"], { ...options, ...streams }))
   try {
-    const found = await mcp.call("acme-crm_tools_search", { query: "comments list" })
+    const found = await mcp.call("acme-crm_tools_search", { query: "contacts list" })
     expect(found.body).toMatchObject({
       items: expect.arrayContaining([
         expect.objectContaining({
-          command: "comments list",
+          command: "contacts list",
           availability: expect.objectContaining({ available: false }),
         }),
       ]),
     })
-    const listed = await mcp.call("acme-crm_read", { command: "comments list" })
+    const listed = await mcp.call("acme-crm_read", { command: "contacts list" })
     expect(listed.isError).toBe(true)
     expect(JSON.stringify(listed.body)).toContain("permission_error")
     expect(service.calls).toEqual([])

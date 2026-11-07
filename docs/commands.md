@@ -55,11 +55,11 @@ acme-crm commands info [path]
 
 ## `acme-crm session`
 
-keep this profile's Example Comments token in the OS keyring
+keep this profile's Acme CRM token in the OS keyring
 
 ### `acme-crm session start`
 
-sign this profile in: the Example Comments API token is asked hidden or read from stdin, never taken as an argument, checked against the service, and only then kept in the keyring, or in a private file
+sign this profile in: the Acme CRM API token is asked hidden or read from stdin, never taken as an argument, checked against the service, and only then kept in the keyring, or in a private file
 
 **Changes something on this computer only.**
 
@@ -71,13 +71,13 @@ acme-crm session start [options]
 |---|---|
 | `--credential-storage <storage>` | where the token is kept: keyring, which falls back to a private file by itself, or file. Default: `keyring`. |
 
-**Returns:** sign in to Example Comments with an API token
+**Returns:** sign in to Acme CRM with an API token
 
 **Example:** `acme-crm personal session start`, `acme-crm personal session start --credential-storage file`
 
 ### `acme-crm session status`
 
-show where this profile's token comes from: ACME_CRM_TOKEN, the keyring or a file, never the token; --check asks Example Comments whose token it is
+show where this profile's token comes from: ACME_CRM_TOKEN, the keyring or a file, never the token; --check asks Acme CRM whose token it is
 
 ```sh
 acme-crm session status [options]
@@ -85,7 +85,7 @@ acme-crm session status [options]
 
 | Option | What it does |
 |---|---|
-| `--check` | ask Example Comments whether the token still works, and whose it is. |
+| `--check` | ask Acme CRM whether the token still works, and whose it is. |
 
 **Returns:** show where this profile's token comes from; never the token
 
@@ -93,7 +93,7 @@ acme-crm session status [options]
 
 ### `acme-crm session end`
 
-forget this profile's token on this computer; the token itself stays valid in Example Comments
+forget this profile's token on this computer; the token itself stays valid in Acme CRM
 
 **Changes something on this computer only.**
 
@@ -117,16 +117,84 @@ acme-crm session list
 
 **Example:** `acme-crm session list`, `acme-crm session list --json`
 
-## `acme-crm comments`
+## `acme-crm sync`
 
-read and write comments in Example Comments, the sample service
+bring the local copy of Acme CRM up to date: organizations, people and deals through the CRM sync, then invoices as proposals the owner confirms; a second run fetches only what changed
 
-### `acme-crm comments list`
-
-list the comments in Example Comments, newest first
+**Changes something on this computer only.**
 
 ```sh
-acme-crm comments list [query] [options]
+acme-crm sync
+```
+
+**Returns:** acme sync — provider, account, state, organizations, people, deals, invoices, issues; every field: acme-crm commands info sync
+
+**Example:** `acme-crm personal sync`, `acme-crm personal sync --json`
+
+## `acme-crm contacts`
+
+read the people in Acme CRM
+
+### `acme-crm contacts list`
+
+list the people in Acme CRM, a page at a time
+
+```sh
+acme-crm contacts list [options]
+```
+
+| Option | What it does |
+|---|---|
+| `--limit <n>` | how many to show. |
+| `--page <n>` | which page, starting at 1. |
+| `--all` | every row, no paging. |
+
+**Returns:** acme contact — id, name, email, phone, organization, updated_at; every field: acme-crm commands info contacts list
+
+**Example:** `acme-crm personal contacts list`, `acme-crm personal contacts list --json=id,name,email`
+
+### `acme-crm contacts show`
+
+show one person in Acme CRM with the organization they work for
+
+```sh
+acme-crm contacts show <id>
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `id` | required | the person's id, as contacts list prints it. |
+
+**Returns:** acme contact — id, name, email, phone, organization, updated_at; every field: acme-crm commands info contacts show
+
+**Example:** `acme-crm personal contacts show per_01`, `acme-crm personal contacts show per_01 --json`
+
+## `acme-crm store`
+
+the local copy of the CRM
+
+### `acme-crm store status`
+
+how far each kind's sync is: rows saved, partial or complete, when it last moved, how many are stored
+
+```sh
+acme-crm store status
+```
+
+**Returns:** crm sync progress — kind, round, id_pass, stored, job, profile, done, total, and 5 more; every field: acme-crm commands info store status
+
+**Example:** `acme-crm work store status --json`
+
+## `acme-crm deals`
+
+the CRM's deals as last synced: stage, status, amount and the people on them
+
+### `acme-crm deals list`
+
+deals copied from the CRM, newest first; run sync to bring them up to date
+
+```sh
+acme-crm deals list [query] [options]
 ```
 
 | Argument | | What it is |
@@ -135,69 +203,141 @@ acme-crm comments list [query] [options]
 
 | Option | What it does |
 |---|---|
-| `--limit <n>` | how many to show. |
+| `--limit <n>` | deals per page, 1–500. Default: `50`. |
+| `--page <n>` | which page, starting at 1. Default: `1`. |
+
+**Returns:** deal — id, ref, kind, title, summary, pipeline, pipeline_name, stage, and 24 more; every field: acme-crm commands info deals list
+
+**Example:** `acme-crm work deals list status:open --json`, `acme-crm work deals list stage:"Quote sent"`
+
+### `acme-crm deals show`
+
+one deal with its pipeline, stage, status, amount and the people on it
+
+```sh
+acme-crm deals show <ref>
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `ref` | required | deal:<id>, as a list shows it. |
+
+**Returns:** deal — id, ref, kind, title, summary, pipeline, pipeline_name, stage, and 24 more; every field: acme-crm commands info deals show
+
+**Example:** `acme-crm work deals show deal:12`
+
+## `acme-crm pipelines`
+
+the CRM's pipelines and their stages, as last synced
+
+### `acme-crm pipelines list`
+
+pipelines copied from the CRM, with their stages in order and how many are open in each
+
+```sh
+acme-crm pipelines list [query]
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `query` | optional | field:value terms that narrow the list — the fields are below. |
+
+**Returns:** pipeline — id, ref, name, kind, account, external_id, stages, created_at, and 3 more; every field: acme-crm commands info pipelines list
+
+**Example:** `acme-crm work pipelines list --json`, `acme-crm work pipelines list kind:lead`
+
+### `acme-crm pipelines show`
+
+one pipeline with its funnel: how many reached each stage, how many went on, and the win rate
+
+```sh
+acme-crm pipelines show <pipeline>
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `pipeline` | required | pipeline:<id>, or a name only one of the CRM's pipelines has. |
+
+**Returns:** pipeline — id, ref, name, kind, account, external_id, stages, created_at, and 3 more; every field: acme-crm commands info pipelines show
+
+**Example:** `acme-crm work pipelines show pipeline:3`
+
+## `acme-crm stages`
+
+the stages of the CRM's pipelines, as last synced
+
+### `acme-crm stages list`
+
+every stage of the CRM's pipelines in order, with its outcome and how many are open in it
+
+```sh
+acme-crm stages list [query]
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `query` | optional | field:value terms that narrow the list — the fields are below. |
+
+**Returns:** stage — name, position, outcome, external_id, open, pipeline, pipeline_name, kind, and 3 more; every field: acme-crm commands info stages list
+
+**Example:** `acme-crm work stages list --json`, `acme-crm work stages list kind:lead`
+
+## `acme-crm fields`
+
+the CRM's own fields on deals, leads, people and organizations, as last synced
+
+### `acme-crm fields list`
+
+the CRM's custom fields of one kind, in its order, with a list field's options
+
+```sh
+acme-crm fields list <kind> [query] [options]
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `kind` | required | deals, people, organizations. |
+| `query` | optional | field:value terms; this list filters by none yet. |
+
+| Option | What it does |
+|---|---|
+| `--limit <n>` | fields per page, 1–500. Default: `50`. |
 | `--page <n>` | which page, starting at 1. |
-| `--all` | every row, no paging. |
+| `--all` | every field, no paging. |
 
-**Returns:** comment — id, text, author, created_at; every field: acme-crm commands info comments list
+**Returns:** crm field — code, label, type, multiple, filterable, untrusted, options; every field: acme-crm commands info fields list
 
-**Example:** `acme-crm personal comments list`, `acme-crm personal comments list author:u2 --json=id,text`
+**Example:** `acme-crm work fields list deals`, `acme-crm work fields list people --json`
 
-### `acme-crm comments show`
+## `acme-crm search`
 
-show one comment in Example Comments
+search what the local store holds
+
+### `acme-crm search all`
+
+search the CRM's deals and leads by the words of their title, and messages, notes and calendar events other WireCat tools stored — best match first. Use it when you do not know where something was written
 
 ```sh
-acme-crm comments show <id>
+acme-crm search all <query> [options]
 ```
 
 | Argument | | What it is |
 |---|---|---|
-| `id` | required | the comment's id, as list prints it. |
-
-**Returns:** comment — id, text, author, created_at; every field: acme-crm commands info comments show
-
-**Example:** `acme-crm personal comments show c1`, `acme-crm personal comments show c1 --json`
-
-### `acme-crm comments create`
-
-post a comment in Example Comments
-
-**Changes something in the service.**
-
-```sh
-acme-crm comments create [options]
-```
+| `query` | required | words and "phrases"; deals and leads match the words of their title. |
 
 | Option | What it does |
 |---|---|
-| `--text <text>` | the comment's text. |
+| `--only <resources>` | only these resources, separated by commas: crm, messages, notes, events; meetings when --source names a meeting account. |
+| `--source <accounts>` | only these accounts, separated by commas: provider:account as a hit shows it, a provider, a kind or group:<name>; each resource reads the ones of its kind, and meetings only when it names one. |
+| `--max-meetings <n>` | how many of the meeting account's meetings to look through, newest first, or all for every one (default 100). |
+| `--limit <n>` | how many. |
+| `--page <n>` | which page, starting at 1. |
+| `--exact` | bare words and quotes match their exact form only, as exact:word does. |
+| `--timezone <zone>` | the IANA timezone for calendar date boundaries. |
 
-**Returns:** post a comment in Example Comments
+**Returns:** hit — kind, ref, provider, account, title, timestamp, excerpt, url, and 13 more; every field: acme-crm commands info search all
 
-**Example:** `acme-crm personal comments create --text "Looks good to me"`, `acme-crm personal comments create --text "Looks good to me" --dry-run`
-
-### `acme-crm comments update`
-
-change the text of your comment in Example Comments
-
-**Changes something in the service.**
-
-```sh
-acme-crm comments update <id> [options]
-```
-
-| Argument | | What it is |
-|---|---|---|
-| `id` | required | the comment's id, as list prints it. |
-
-| Option | What it does |
-|---|---|
-| `--text <text>` | the new text. |
-
-**Returns:** change the text of your comment in Example Comments
-
-**Example:** `acme-crm personal comments update c1 --text "Looks good now"`
+**Example:** `acme-crm work search all Example LLC`, `acme-crm work search all website --only crm --json`
 
 ## `acme-crm doctor`
 
@@ -281,7 +421,7 @@ acme-crm mcp serve [options]
 
 | Option | What it does |
 |---|---|
-| `--permission <key=level>` | make a permission stricter for this server only, like comments.create=deny; it never loosens the profile; repeat for more keys. |
+| `--permission <key=level>` | make a permission stricter for this server only, like contacts.show=deny; it never loosens the profile; repeat for more keys. |
 | `--profiles <names\|all>` | serve several profiles from one server instead of one: names, comma-separated, or all for every profile. |
 | `--http` | serve over HTTP on 127.0.0.1 for ChatGPT and Claude in the browser, behind your tunnel; the profile's permissions decide. |
 | `--port <port>` | the local port for --http (default 8765). |
@@ -378,7 +518,7 @@ acme-crm mcp config [options]
 
 | Option | What it does |
 |---|---|
-| `--permission <key=level>` | make a permission stricter for this server only, like comments.create=deny; it never loosens the profile; repeat for more keys. |
+| `--permission <key=level>` | make a permission stricter for this server only, like contacts.show=deny; it never loosens the profile; repeat for more keys. |
 | `--profiles <names\|all>` | serve several profiles from one server instead of one: names, comma-separated, or all for every profile. |
 
 **Returns:** print the local MCP configuration of this profile, or of those --profiles names
@@ -402,7 +542,7 @@ acme-crm mcp add <client> [options]
 | Option | What it does |
 |---|---|
 | `--allow-writes` | acknowledge that this profile offers writing tools. |
-| `--permission <key=level>` | make a permission stricter for this server only, like comments.create=deny; it never loosens the profile; repeat for more keys. |
+| `--permission <key=level>` | make a permission stricter for this server only, like contacts.show=deny; it never loosens the profile; repeat for more keys. |
 
 **Returns:** add this profile's local MCP server to Codex or Claude Code
 
@@ -418,7 +558,7 @@ acme-crm mcp check [options]
 
 | Option | What it does |
 |---|---|
-| `--permission <key=level>` | make a permission stricter for this server only, like comments.create=deny; it never loosens the profile; repeat for more keys. |
+| `--permission <key=level>` | make a permission stricter for this server only, like contacts.show=deny; it never loosens the profile; repeat for more keys. |
 
 **Returns:** check this profile's local MCP handshake and tool list
 

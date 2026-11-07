@@ -9,6 +9,9 @@ const saved = { ...process.env }
 // every folder and store variable at them (WC-TEST-1, WC-STORE-14). The config folder is set only because tests
 // write into it by name.
 process.env.ACME_CRM_CONFIG_DIR = join(tmpdir(), "config")
+process.env.MESSAGING_STORE = join(tmpdir(), "wirecat.db")
+delete process.env.ACME_CRM_BASE_URL
+delete process.env.ACME_CRM_TOKEN
 process.env.ACME_CRM_NO_UPDATE_CHECK = "1"
 process.env.ACME_CRM_TEST_ARGV_LOG = ARGV_LOG
 delete process.env.ACME_CRM_PROFILE
