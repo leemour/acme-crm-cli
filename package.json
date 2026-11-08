@@ -1,7 +1,8 @@
 {
   "name": "@leemour/acme-crm-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An example third-party WireCat CLI: Acme CRM contacts, deals and invoices, synthetic data only",
+  "mcpName": "io.github.leemour/acme-crm-cli",
   "license": "Apache-2.0",
   "author": "Viacheslav Ptsarev",
   "repository": {
