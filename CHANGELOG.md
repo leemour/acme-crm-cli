@@ -2,6 +2,24 @@
 
 Notable changes to `@leemour/acme-crm-cli`. One section per version, newest first.
 
+## 0.3.0 — 08.11.2026
+
+### Added
+
+- `deals list --format csv` prints the page as a table for a spreadsheet, from cli-core.
+- The manifest says which hosts the example talks to: none on its own, since it answers from a built-in fake, and the
+  Acme CRM server you set in `ACME_CRM_BASE_URL`.
+
+### Security
+
+- With `ACME_CRM_BASE_URL` set, requests go through cli-base's `hostFetch` and reach only that server's host: a
+  redirect elsewhere is refused before a byte is sent. An address that does not parse is a `configuration_error`.
+
+### Fixed
+
+- A hidden prompt, such as the token prompt of `session start`, asks again when nothing arrived. From cli-core
+  0.615.0 (was 0.605.0) and cli-base 0.87.0 (was 0.82.0).
+
 ## 0.2.0 — 08.11.2026
 
 ### Fixed

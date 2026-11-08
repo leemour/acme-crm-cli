@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs"
 import { CliError } from "@wirecat/cli-base"
+import { hostFetch } from "@wirecat/cli-base/http"
 import {
   accountFileFor,
   type BaseEnvironment,
@@ -14,7 +15,7 @@ import { type AcmeApi, acmeApi } from "./acme/api.js"
 import { fakeAcme } from "./acme/fake.js"
 import { SERVICE, transport } from "./acme/transport.js"
 import { configuration } from "./config.js"
-import { IDENTITY } from "./identity.js"
+import { DESKTOP, IDENTITY } from "./identity.js"
 import { tokenStore } from "./token.js"
 
 /** What a test hands `run()` beside cli-core's own: the fake service in place of the network (WC-ARCH-10). */
@@ -50,8 +51,13 @@ export const refuseOffline = (flags: GlobalFlags) => {
 }
 
 /** With no base URL the CLI talks to the built-in fake, so the example works with no service behind it. */
-const fetchFor = (env: NodeJS.ProcessEnv, injected: typeof fetch | undefined) =>
-  injected ?? (env[BASE_URL_VARIABLE] ? fetch : fakeAcme().fetch)
+export const fetchFor = (env: NodeJS.ProcessEnv, injected: typeof fetch | undefined) => {
+  if (injected) return injected
+  const base = env[BASE_URL_VARIABLE]
+  if (!base) return fakeAcme().fetch
+  if (!URL.canParse(base)) throw new CliError("configuration_error", `${BASE_URL_VARIABLE} is not an address`)
+  return hostFetch({ hosts: [...DESKTOP.hosts, new URL(base).hostname] })
+}
 
 /** The service for one run, with the token it was given; `events` comes from `run()`, so each request is recorded. */
 export const serviceFor = (command: Command, token: string, events?: EventSink): AcmeApi => {

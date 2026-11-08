@@ -23,7 +23,7 @@ export interface Request {
 export interface TransportOptions {
   token: string
   baseUrl?: string
-  fetch?: typeof fetch
+  fetch: typeof fetch
   signal?: AbortSignal | undefined
   /** The run's sink from `baseContext(...).run(events => …)`, so each request lands in the run record (WC-LIFE-15). */
   events?: EventSink
@@ -73,7 +73,7 @@ export const failureOf = (status: number, retryAfterMs?: number): CliError => {
  * record (WC-SECR-7). Every call is a read, and nothing here retries: the caller may run the command again.
  */
 export const transport = (options: TransportOptions) => {
-  const fetchOf = options.fetch ?? fetch
+  const fetchOf = options.fetch
   const base = options.baseUrl ?? FAKE_URL
   const sleep = options.sleep ?? realSleep
   const now = options.now ?? Date.now

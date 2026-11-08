@@ -36,6 +36,7 @@ describe("the shipped manifest", () => {
     })
     expect(readFileSync(MANIFEST, "utf8")).toBe(manifestText(manifest))
     expect(manifest.desktop.storage).toEqual({ app: "leemour-acme-crm-cli", env: "ACME_CRM" })
+    expect(manifest.network).toEqual({ hosts: [], user_hosts: "the Acme CRM server you set in ACME_CRM_BASE_URL" })
     expect(manifest.desktop.sync).toMatchObject({
       what: "contacts, deals and invoices",
       run: ["{profile}", "sync", "--record", "--json"],
