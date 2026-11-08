@@ -10,6 +10,7 @@
       "path": [
         "commands"
       ],
+      "summary": "every command by section; --json prints its contract, one path per call",
       "effects": {
         "remote": "none",
         "local": "none"
@@ -20,6 +21,7 @@
         "commands",
         "info"
       ],
+      "summary": "one command contract, or all schemas, error reasons and explicit overrides",
       "effects": {
         "remote": "none",
         "local": "none"
@@ -30,6 +32,7 @@
         "session",
         "start"
       ],
+      "summary": "sign in to Acme CRM with an API token",
       "effects": {
         "remote": "read",
         "local": "write"
@@ -40,6 +43,7 @@
         "session",
         "status"
       ],
+      "summary": "show where this profile's token comes from; never the token",
       "effects": {
         "remote": "read",
         "local": "read"
@@ -50,6 +54,7 @@
         "session",
         "end"
       ],
+      "summary": "forget this profile's token on this computer",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -60,6 +65,7 @@
         "session",
         "list"
       ],
+      "summary": "list the profiles here and whether each is signed in",
       "effects": {
         "remote": "none",
         "local": "read"
@@ -69,126 +75,149 @@
       "path": [
         "sync"
       ],
+      "summary": "copy Acme CRM contacts and deals into the store, invoices as proposals",
       "effects": {
         "remote": "read",
         "local": "write"
       },
-      "permission": "sync"
+      "permission": "sync",
+      "entity": "acme_sync"
     },
     {
       "path": [
         "contacts",
         "list"
       ],
+      "summary": "list the people in Acme CRM, a page at a time",
       "effects": {
         "remote": "read",
         "local": "read"
       },
-      "permission": "contacts.list"
+      "permission": "contacts.list",
+      "entity": "acme_contact"
     },
     {
       "path": [
         "contacts",
         "show"
       ],
+      "summary": "show one person in Acme CRM with the organization they work for",
       "effects": {
         "remote": "read",
         "local": "read"
       },
-      "permission": "contacts.show"
+      "permission": "contacts.show",
+      "entity": "acme_contact"
     },
     {
       "path": [
         "store",
         "status"
       ],
+      "summary": "how far each kind's sync is: rows saved, partial or complete, when it last…",
       "effects": {
         "remote": "none",
         "local": "read"
       },
-      "permission": "store.status"
+      "permission": "store.status",
+      "entity": "crm_sync_progress"
     },
     {
       "path": [
         "deals",
         "list"
       ],
+      "summary": "deals copied from the CRM, newest first; run sync to bring them up to date",
       "effects": {
         "remote": "none",
         "local": "read"
       },
-      "permission": "deals.list"
+      "permission": "deals.list",
+      "entity": "deal"
     },
     {
       "path": [
         "deals",
         "show"
       ],
+      "summary": "one deal with its pipeline, stage, status, amount and the people on it",
       "effects": {
         "remote": "none",
         "local": "read"
       },
-      "permission": "deals.show"
+      "permission": "deals.show",
+      "entity": "deal"
     },
     {
       "path": [
         "pipelines",
         "list"
       ],
+      "summary": "pipelines copied from the CRM, with their stages in order and how many are…",
       "effects": {
         "remote": "none",
         "local": "read"
       },
-      "permission": "pipelines.list"
+      "permission": "pipelines.list",
+      "entity": "pipeline"
     },
     {
       "path": [
         "pipelines",
         "show"
       ],
+      "summary": "one pipeline as a board and a funnel: how many stand in each stage and their…",
       "effects": {
         "remote": "none",
         "local": "read"
       },
-      "permission": "pipelines.show"
+      "permission": "pipelines.show",
+      "entity": "pipeline"
     },
     {
       "path": [
         "stages",
         "list"
       ],
+      "summary": "every stage of the CRM's pipelines in order, with its outcome and how many…",
       "effects": {
         "remote": "none",
         "local": "read"
       },
-      "permission": "stages.list"
+      "permission": "stages.list",
+      "entity": "stage"
     },
     {
       "path": [
         "fields",
         "list"
       ],
+      "summary": "the CRM's custom fields of one kind, in its order, with a list field's options",
       "effects": {
         "remote": "none",
         "local": "read"
       },
-      "permission": "fields.list"
+      "permission": "fields.list",
+      "entity": "crm_field"
     },
     {
       "path": [
         "search",
         "all"
       ],
+      "summary": "search stored deals and leads, messages, notes and calendar events",
       "effects": {
         "remote": "none",
         "local": "read"
       },
-      "permission": "search.all"
+      "permission": "search.all",
+      "entity": "hit"
     },
     {
       "path": [
         "doctor"
       ],
+      "summary": "the state this installation is in, without connecting unless --online",
       "effects": {
         "remote": "read",
         "local": "read"
@@ -199,6 +228,7 @@
         "skill",
         "show"
       ],
+      "summary": "print the tool's instructions for AI agents",
       "effects": {
         "remote": "none",
         "local": "read"
@@ -209,6 +239,7 @@
         "skill",
         "install"
       ],
+      "summary": "install the tool's instructions for AI agents",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -219,6 +250,7 @@
         "skill",
         "status"
       ],
+      "summary": "whether the installed instructions for AI agents match this version",
       "effects": {
         "remote": "none",
         "local": "read"
@@ -229,6 +261,7 @@
         "mcp",
         "serve"
       ],
+      "summary": "serve this profile's commands to an AI agent",
       "effects": {
         "remote": "write",
         "local": "write"
@@ -239,6 +272,7 @@
         "mcp",
         "revoke"
       ],
+      "summary": "forget every login given to a browser app",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -250,6 +284,7 @@
         "server",
         "start"
       ],
+      "summary": "start the HTTP MCP server in the background",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -261,6 +296,7 @@
         "server",
         "stop"
       ],
+      "summary": "stop the background HTTP MCP server",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -272,6 +308,7 @@
         "server",
         "status"
       ],
+      "summary": "whether the HTTP MCP server runs, its login code and the apps logged in",
       "effects": {
         "remote": "none",
         "local": "read"
@@ -282,6 +319,7 @@
         "mcp",
         "config"
       ],
+      "summary": "print the local MCP configuration of this profile, or of those --profiles names",
       "effects": {
         "remote": "none",
         "local": "read"
@@ -292,6 +330,7 @@
         "mcp",
         "add"
       ],
+      "summary": "add this profile's local MCP server to Codex or Claude Code",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -302,6 +341,7 @@
         "mcp",
         "check"
       ],
+      "summary": "check this profile's local MCP handshake and tool list",
       "effects": {
         "remote": "none",
         "local": "read"
@@ -311,6 +351,7 @@
       "path": [
         "upgrade"
       ],
+      "summary": "upgrade acme-crm with the package manager that installed it; --check only looks",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -321,6 +362,7 @@
         "config",
         "show"
       ],
+      "summary": "the profile, the profiles that exist, and each setting with where it came from",
       "effects": {
         "remote": "none",
         "local": "read"
@@ -331,6 +373,7 @@
         "config",
         "set"
       ],
+      "summary": "save a setting to the configuration file",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -341,6 +384,7 @@
         "config",
         "unset"
       ],
+      "summary": "remove a setting from the configuration file",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -351,6 +395,7 @@
         "config",
         "migrate"
       ],
+      "summary": "write each setting the file lacks at its default, keeping yours",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -361,6 +406,7 @@
         "config",
         "repair"
       ],
+      "summary": "fix the settings file's JSON syntax, keeping every value",
       "effects": {
         "remote": "none",
         "local": "write"
@@ -371,32 +417,105 @@
         "runs",
         "list"
       ],
+      "summary": "recorded runs, newest first",
       "effects": {
         "remote": "none",
         "local": "read"
-      }
+      },
+      "entity": "run"
     },
     {
       "path": [
         "runs",
         "show"
       ],
+      "summary": "one run: what it was, how it ended, and every event it logged",
       "effects": {
         "remote": "none",
         "local": "read"
-      }
+      },
+      "entity": "run"
     },
     {
       "path": [
         "runs",
         "path"
       ],
+      "summary": "the directory holding one run",
       "effects": {
         "remote": "none",
         "local": "none"
-      }
+      },
+      "entity": "run_location"
     }
   ],
+  "entities": {
+    "acme_contact": {
+      "fields": [
+        "organization"
+      ]
+    },
+    "deal": {
+      "fields": [
+        "status",
+        "organization"
+      ]
+    },
+    "pipeline": {
+      "fields": [
+        "kind"
+      ]
+    },
+    "stage": {
+      "fields": [
+        "kind"
+      ]
+    },
+    "crm_field": {
+      "fields": [
+        "code",
+        "label",
+        "type",
+        "multiple",
+        "filterable",
+        "untrusted"
+      ]
+    },
+    "run": {
+      "fields": [
+        "run_id",
+        "command",
+        "profile",
+        "started_at",
+        "completed_at",
+        "status",
+        "requests",
+        "duration_ms",
+        "cli_version",
+        "runtime",
+        "platform",
+        "arch",
+        "error_code",
+        "provider_error",
+        "kept_because_failed",
+        "operations",
+        "codes",
+        "trace_id",
+        "cli_command",
+        "argv",
+        "unknown_command",
+        "via",
+        "events_dropped",
+        "directory",
+        "event_count",
+        "events_truncated"
+      ]
+    }
+  },
+  "network": {
+    "hosts": [],
+    "user_hosts": "the Acme CRM server you set in ACME_CRM_BASE_URL"
+  },
   "desktop": {
     "tagline": "Example CRM: Acme contacts, deals and invoices",
     "profiles": {

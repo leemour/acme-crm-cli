@@ -17,7 +17,7 @@ export const IDENTITY: AppIdentity = {
 
 // What `wcat` and WireCat Desktop show before the tool is installed. The bin passes it to wcatStart before anything
 // else loads; src/wcat.ts adds the permission keys.
-export const DESKTOP: ManifestIdentity = {
+export const DESKTOP: ManifestIdentity & { hosts: readonly string[] } = {
   ...IDENTITY,
   docs: "https://github.com/leemour/acme-crm-cli#readme",
   tagline: "Example CRM: Acme contacts, deals and invoices",
@@ -26,6 +26,9 @@ export const DESKTOP: ManifestIdentity = {
     gives: "Lets your agent read the Acme CRM workspace: contacts, deals and invoices.",
     asks: "An Acme CRM API token. The example takes any acme_test_ token.",
   },
+  // Without ACME_CRM_BASE_URL the CLI answers from its built-in fake and contacts no host.
+  hosts: [],
+  userHosts: "the Acme CRM server you set in ACME_CRM_BASE_URL",
 }
 
 export const SKILL = new URL("../skills/leemour-acme-crm-cli/SKILL.md", import.meta.url)

@@ -209,10 +209,11 @@ acme-crm deals list [query] [options]
 |---|---|
 | `--limit <n>` | deals per page, 1–500. Default: `50`. |
 | `--page <n>` | which page, starting at 1. Default: `1`. |
+| `--format <format>` | csv: this page as a table for a spreadsheet; --json=a,b picks its columns. One of: `csv`. |
 
 **Returns:** deal — id, ref, kind, title, summary, pipeline, pipeline_name, stage, and 24 more; every field: acme-crm commands info deals list
 
-**Example:** `acme-crm work deals list status:open --json`, `acme-crm work deals list stage:"Quote sent"`
+**Example:** `acme-crm work deals list status:open --json`, `acme-crm work deals list stage:"Quote sent"`, `acme-crm work deals list status:open --format csv > deals.csv`
 
 ### `acme-crm deals show`
 
@@ -252,19 +253,19 @@ acme-crm pipelines list [query]
 
 ### `acme-crm pipelines show`
 
-one pipeline with its funnel: how many reached each stage, how many went on, and the win rate
+one pipeline as a board and a funnel: how many stand in each stage and their sum per currency, never converted, how many reached it and went on, and the win rate; won and lost stages are marked by outcome
 
 ```sh
-acme-crm pipelines show <pipeline>
+acme-crm pipelines show [pipeline]
 ```
 
 | Argument | | What it is |
 |---|---|---|
-| `pipeline` | required | pipeline:<id>, or a name only one of the CRM's pipelines has. |
+| `pipeline` | optional | pipeline:<id>, or a name only one of the CRM's pipelines has; needed unless the CRM has one pipeline in all. |
 
 **Returns:** pipeline — id, ref, name, kind, account, external_id, stages, created_at, and 3 more; every field: acme-crm commands info pipelines show
 
-**Example:** `acme-crm work pipelines show pipeline:3`
+**Example:** `acme-crm work pipelines show pipeline:3`, `acme-crm work pipelines show Sales --json`
 
 ## `acme-crm stages`
 
@@ -282,7 +283,7 @@ acme-crm stages list [query]
 |---|---|---|
 | `query` | optional | field:value terms that narrow the list — the fields are below. |
 
-**Returns:** stage — name, position, outcome, external_id, open, pipeline, pipeline_name, kind, and 3 more; every field: acme-crm commands info stages list
+**Returns:** stage — name, position, outcome, external_id, open, pipeline, pipeline_name, kind, and 5 more; every field: acme-crm commands info stages list
 
 **Example:** `acme-crm work stages list --json`, `acme-crm work stages list kind:lead`
 
@@ -339,7 +340,7 @@ acme-crm search all <query> [options]
 | `--exact` | bare words and quotes match their exact form only, as exact:word does. |
 | `--timezone <zone>` | the IANA timezone for calendar date boundaries. |
 
-**Returns:** hit — kind, ref, provider, account, title, timestamp, excerpt, url, and 13 more; every field: acme-crm commands info search all
+**Returns:** hit — kind, ref, provider, account, title, timestamp, excerpt, url, and 15 more; every field: acme-crm commands info search all
 
 **Example:** `acme-crm work search all Example LLC`, `acme-crm work search all website --only crm --json`
 
@@ -614,7 +615,7 @@ acme-crm config set <setting> <value> [options]
 
 | Argument | | What it is |
 |---|---|---|
-| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin. |
+| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types. |
 | `value` | required | a number, true or false; for a group tg:work,max:Alice,email:me@x. |
 
 | Option | What it does |
@@ -637,7 +638,7 @@ acme-crm config unset <setting> [options]
 
 | Argument | | What it is |
 |---|---|---|
-| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin. |
+| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types. |
 
 | Option | What it does |
 |---|---|

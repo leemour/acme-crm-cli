@@ -51,6 +51,9 @@ it("sync imports contacts and deals through the CRM port and invoices as proposa
     service,
   })
   expect(paged.json().items).toHaveLength(5)
+  const table = await runCli(["personal", "deals", "list", "status:won", "--format", "csv"], { keyring, service })
+  expect(table.code).toBe(0)
+  expect(table.out.trim().split("\n")).toHaveLength(4)
   const status = await runCli(["personal", "store", "status", "--json"], { keyring, service })
   expect(status.json().items).toContainEqual(expect.objectContaining({ kind: "deal", stored: 15, state: "complete" }))
   const pipelines = await runCli(["personal", "pipelines", "list", "--json"], { keyring, service })

@@ -1,6 +1,6 @@
 {
   "name": "@leemour/acme-crm-cli",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "An example third-party WireCat CLI: Acme CRM contacts, deals and invoices, synthetic data only",
   "mcpName": "io.github.leemour/acme-crm-cli",
   "license": "Apache-2.0",
@@ -58,8 +58,8 @@
     "docs:spell": "cspell lint --config cspell.json --no-progress --no-summary README.md SECURITY.md CHANGELOG.md AGENTS.md CLAUDE.md 'docs/*.md' 'skills/**/*.md'"
   },
   "dependencies": {
-    "@wirecat/cli-base": "0.82.0",
-    "@wirecat/cli-core": "0.605.0",
+    "@wirecat/cli-base": "0.87.0",
+    "@wirecat/cli-core": "0.615.0",
     "commander": "15.0.0",
     "valibot": "1.5.0"
   },
