@@ -2,6 +2,21 @@
 
 Notable changes to `@leemour/acme-crm-cli`. One section per version, newest first.
 
+## Unreleased
+
+### Added
+
+- cli-core's store maintenance commands (`store info`, `check`, `backup`, `restore`, `repair` and the others) and
+  `doctor reports`, listed in [docs/commands.md](docs/commands.md).
+
+### Fixed
+
+- cli-core 0.662.0 (was 0.615.0) and cli-base 0.99.0 (was 0.87.0). The CRM source answers cli-core's new page shape
+  (`hasMore`, `nextCursor`), so `sync` still copies every page of contacts, organizations and deals, not only the
+  first 100 of each.
+- The manifest names the hosts cli-core's own commands reach, such as npm for the update check and Hugging Face for
+  local models.
+
 ## 0.3.0 — 08.11.2026
 
 ### Added

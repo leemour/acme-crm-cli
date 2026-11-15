@@ -81,10 +81,10 @@ const everyPage = async <K extends ListName>(api: AcmeApi, name: K, organization
   for (let turn = 0; turn < MOST_PAGES; turn++) {
     const found = await api.list(name, { page, organization })
     for (const item of found.items) items.push(item)
-    if (!found.next) return { items, has_more: false }
+    if (!found.next) return { items, hasMore: false }
     page = found.next
   }
-  return { items, has_more: true }
+  return { items, hasMore: true }
 }
 
 const syncSchema = v.strictObject({
@@ -233,10 +233,10 @@ const contactsList = () =>
       const found = await withService(this, async (api) => {
         if (settings.all) return everyPage(api, "people", organization)
         const one = await api.list("people", { limit: Math.min(limit, 100), page: String(offset), organization })
-        return { items: one.items, has_more: one.next !== null }
+        return { items: one.items, hasMore: one.next !== null }
       })
       const items = found.items.map((person) => contactOf(person, null))
-      renderAnswer(this, outputFor(this), pagedList(path, settings, { items, has_more: found.has_more }))
+      renderAnswer(this, outputFor(this), pagedList(path, settings, { items, hasMore: found.hasMore }))
     })
 
 const contactsShow = () =>

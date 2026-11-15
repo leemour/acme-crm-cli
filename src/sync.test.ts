@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { memoryKeyring } from "@wirecat/cli-base"
 import { expect, it } from "vitest"
 import { FAKE_TOKEN, fakeAcme } from "./acme/fake.js"
-import { runCli } from "./testing/harness.js"
+import { manyDeals, runCli } from "./testing/harness.js"
 
 const signedInFresh = async () => {
   const keyring = memoryKeyring()
@@ -72,6 +72,18 @@ it("sync imports contacts and deals through the CRM port and invoices as proposa
   expect(again.json().item).toMatchObject({ deals: 0, invoices: { created: 0, unchanged: 8 } })
 
   for (const run of [first, deals, again]) expect(run.out + run.err).not.toContain(FAKE_TOKEN)
+})
+
+it("sync copies every page of deals, not only the first", async () => {
+  const keyring = memoryKeyring()
+  const data = manyDeals(250)
+  // The store is shared by this file's tests: another workspace keeps the first test's cursor out of this sync.
+  data.workspace.id = "acme-many"
+  const service = fakeAcme({ data })
+  await runCli(["personal", "session", "start", "--json"], { keyring, service, stdin: FAKE_TOKEN })
+  const sync = await runCli(["personal", "sync", "--json"], { keyring, service })
+  expect(sync.json().item).toMatchObject({ state: "complete", deals: 250 })
+  expect(service.calls.filter((call) => call.path === "/v1/deals")).toHaveLength(3)
 })
 
 it("a store read before any session start says how to sign in", async () => {

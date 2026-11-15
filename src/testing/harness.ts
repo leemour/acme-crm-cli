@@ -1,6 +1,7 @@
 import { Readable } from "node:stream"
 import { type KeyringStore, memoryKeyring } from "@wirecat/cli-base"
 import type { RunOptions } from "@wirecat/cli-core/cli"
+import { type Dataset, dataset } from "../acme/data.js"
 import { FAKE_TOKEN, fakeAcme } from "../acme/fake.js"
 import type { ServiceEnvironment } from "../context.js"
 import { IDENTITY } from "../identity.js"
@@ -49,4 +50,16 @@ export const runCli = async (
   const code = await run(argv, options)
   const text = { out: out.join(""), err: err.join("") }
   return { code, ...text, json: () => JSON.parse(text.out.trim() || text.err.trim()) as Record<string, unknown> }
+}
+
+/** The dataset with `count` deals, more than one page of `PAGE_SIZE` when `count` is above it. */
+export const manyDeals = (count: number): Dataset => {
+  const data = dataset()
+  const [first] = data.deals
+  if (!first) return data
+  data.deals = Array.from({ length: count }, (_, i) => ({
+    ...(data.deals[i % data.deals.length] ?? first),
+    id: `deal_${i + 1}`,
+  }))
+  return data
 }
