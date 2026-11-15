@@ -124,6 +124,189 @@
     },
     {
       "path": [
+        "store",
+        "apply"
+      ],
+      "summary": "apply scope mine to the contacts already stored: remove those no deal or…",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.apply",
+      "entity": "crm_contacts_removed"
+    },
+    {
+      "path": [
+        "store",
+        "info"
+      ],
+      "summary": "the shared store's format, size and contents, and whether this tool can read it",
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "store.info",
+      "entity": "store_info"
+    },
+    {
+      "path": [
+        "store",
+        "check"
+      ],
+      "summary": "check the local store for problems",
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "store.check",
+      "entity": "store_check"
+    },
+    {
+      "path": [
+        "store",
+        "migrate"
+      ],
+      "summary": "migrate an older local store",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.migrate",
+      "entity": "store_migration"
+    },
+    {
+      "path": [
+        "store",
+        "rebuild"
+      ],
+      "summary": "rebuild the local store's search indexes",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.rebuild",
+      "entity": "store_reindex"
+    },
+    {
+      "path": [
+        "store",
+        "backup"
+      ],
+      "summary": "copy the store into a new file, while it is in use; never overwrites a file",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.backup",
+      "entity": "store_backup"
+    },
+    {
+      "path": [
+        "store",
+        "restore"
+      ],
+      "summary": "restore a backup and keep the current store, or roll back a breaking upgrade",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.restore",
+      "entity": "store_restore"
+    },
+    {
+      "path": [
+        "store",
+        "decrypt"
+      ],
+      "summary": "open a file written with --encrypt into a new file; asks for its password",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.decrypt",
+      "entity": "store_decrypt"
+    },
+    {
+      "path": [
+        "store",
+        "repair"
+      ],
+      "summary": "repair table shapes while keeping the old tables",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.repair",
+      "entity": "store_repair"
+    },
+    {
+      "path": [
+        "store",
+        "reset"
+      ],
+      "summary": "back up the local store and replace it with an empty one",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.reset",
+      "entity": "store_reset"
+    },
+    {
+      "path": [
+        "store",
+        "copies",
+        "delete"
+      ],
+      "summary": "delete one copy `store repair` kept, named exactly; refuses any other table",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.copies.delete",
+      "entity": "store_copy_removal"
+    },
+    {
+      "path": [
+        "store",
+        "tables",
+        "list"
+      ],
+      "summary": "every table of the local archive, with its kind and row count",
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "store.tables.list",
+      "entity": "store_table"
+    },
+    {
+      "path": [
+        "store",
+        "recover"
+      ],
+      "summary": "what is damaged in the store and how to recover it",
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "store.recover"
+    },
+    {
+      "path": [
+        "store",
+        "recover",
+        "run"
+      ],
+      "summary": "rebuild a damaged store from every row it can read",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "store.recover.run"
+    },
+    {
+      "path": [
         "deals",
         "list"
       ],
@@ -140,7 +323,7 @@
         "deals",
         "show"
       ],
-      "summary": "one deal with its pipeline, stage, status, amount and the people on it",
+      "summary": "one deal with its pipeline, stage, status, amount and the people on it, and…",
       "effects": {
         "remote": "none",
         "local": "read"
@@ -205,7 +388,7 @@
         "search",
         "all"
       ],
-      "summary": "search stored deals and leads, messages, notes and calendar events",
+      "summary": "search stored deals and leads, messages, notes, calendar events and meetings",
       "effects": {
         "remote": "none",
         "local": "read"
@@ -222,6 +405,31 @@
         "remote": "read",
         "local": "read"
       }
+    },
+    {
+      "path": [
+        "doctor",
+        "reports",
+        "show"
+      ],
+      "summary": "what a report holds and never holds, and where to send it; writes nothing",
+      "effects": {
+        "remote": "none",
+        "local": "none"
+      }
+    },
+    {
+      "path": [
+        "doctor",
+        "reports",
+        "create"
+      ],
+      "summary": "the report file written: its path, the run it is about, and where to send it",
+      "effects": {
+        "remote": "none",
+        "local": "write"
+      },
+      "permission": "doctor.reports.create"
     },
     {
       "path": [
@@ -455,6 +663,14 @@
         "organization"
       ]
     },
+    "store_table": {
+      "fields": [
+        "name",
+        "kind",
+        "rows",
+        "bytes"
+      ]
+    },
     "deal": {
       "fields": [
         "status",
@@ -513,7 +729,14 @@
     }
   },
   "network": {
-    "hosts": [],
+    "hosts": [
+      "registry.npmjs.org",
+      "huggingface.co",
+      "*.huggingface.co",
+      "*.hf.co",
+      "github.com",
+      "*.githubusercontent.com"
+    ],
     "user_hosts": "the Acme CRM server you set in ACME_CRM_BASE_URL"
   },
   "desktop": {

@@ -7,7 +7,7 @@ ran it · ⛔ not tested offline, with the reason and where it is checked instea
 Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 [TESTING.md](TESTING.md) for how, and for the states and failures that cut across commands.
 
-**80 ✅ · 29 ⛔ · 0 ❌** — 39 commands, 70 options.
+**80 ✅ · 52 ⛔ · 0 ❌** — 55 commands, 77 options.
 
 | Command | Option | | Note |
 |---|---|---|---|
@@ -26,6 +26,26 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `contacts list` | `--all` | ✅ |  |
 | `contacts show` |  | ✅ |  |
 | `store status` |  | ✅ |  |
+| `store apply` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store apply` | `--yes` | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store info` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store check` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store migrate` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store rebuild` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store backup` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store backup` | `--encrypt` | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store restore` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store decrypt` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store decrypt` | `--output` | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store repair` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store repair` | `--dry-run` | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store reset` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store reset` | `--no-backup` | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store reset` | `--dry-run` | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store copies delete` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store tables list` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store recover` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
+| `store recover run` |  | ⛔ | cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests drive them on a CRM program |
 | `deals list` |  | ✅ |  |
 | `deals list` | `--limit` | ✅ |  |
 | `deals list` | `--page` | ✅ |  |
@@ -41,13 +61,16 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `search all` |  | ✅ |  |
 | `search all` | `--only` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
 | `search all` | `--source` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
-| `search all` | `--max-meetings` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
 | `search all` | `--limit` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
 | `search all` | `--page` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
 | `search all` | `--exact` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
 | `search all` | `--timezone` | ⛔ | cli-core's addCrmSearchAll, whose own tests drive each option; src/sync.test.ts runs search all over this CLI's store |
 | `doctor` |  | ✅ |  |
 | `doctor` | `--online` | ✅ |  |
+| `doctor reports show` |  | ⛔ | cli-core's appDoctorCommand; its app-mcp-command test creates and shows a report |
+| `doctor reports create` |  | ⛔ | cli-core's appDoctorCommand; its app-mcp-command test creates and shows a report |
+| `doctor reports create` | `--run` | ⛔ | cli-core's appDoctorCommand; its app-mcp-command test creates and shows a report |
+| `doctor reports create` | `--output` | ⛔ | cli-core's appDoctorCommand; its app-mcp-command test creates and shows a report |
 | `skill show` |  | ✅ |  |
 | `skill show` | `--for` | ✅ |  |
 | `skill install` |  | ✅ |  |

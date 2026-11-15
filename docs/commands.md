@@ -49,8 +49,6 @@ acme-crm commands info [path]
 |---|---|---|
 | `path` | optional | one command path; without one, export schemas, error reasons and explicit overrides. |
 
-**Returns:** one command contract, or all schemas, error reasons and explicit overrides
-
 **Example:** `acme-crm commands info commands`
 
 ## `acme-crm session`
@@ -71,8 +69,6 @@ acme-crm session start [options]
 |---|---|
 | `--credential-storage <storage>` | where the token is kept: keyring, which falls back to a private file by itself, or file. Default: `keyring`. |
 
-**Returns:** sign in to Acme CRM with an API token
-
 **Example:** `acme-crm personal session start`, `acme-crm personal session start --credential-storage file`
 
 ### `acme-crm session status`
@@ -87,8 +83,6 @@ acme-crm session status [options]
 |---|---|
 | `--check` | ask Acme CRM whether the token still works, and whose it is. |
 
-**Returns:** show where this profile's token comes from; never the token
-
 **Example:** `acme-crm personal session status`, `acme-crm personal session status --check --json`
 
 ### `acme-crm session end`
@@ -101,8 +95,6 @@ forget this profile's token on this computer; the token itself stays valid in Ac
 acme-crm session end
 ```
 
-**Returns:** forget this profile's token on this computer
-
 **Example:** `acme-crm personal session end`
 
 ### `acme-crm session list`
@@ -112,8 +104,6 @@ list the profiles on this computer and whether each has a token; picks none
 ```sh
 acme-crm session list
 ```
-
-**Returns:** list the profiles here and whether each is signed in
 
 **Example:** `acme-crm session list`, `acme-crm session list --json`
 
@@ -175,7 +165,7 @@ acme-crm contacts show <id>
 
 ## `acme-crm store`
 
-the local copy of the CRM
+the local copy of the CRM, and the shared store file it lives in
 
 ### `acme-crm store status`
 
@@ -185,9 +175,236 @@ how far each kind's sync is: rows saved, partial or complete, when it last moved
 acme-crm store status
 ```
 
-**Returns:** crm sync progress — kind, round, id_pass, stored, job, profile, done, total, and 5 more; every field: acme-crm commands info store status
+**Returns:** crm sync progress — kind, round, id_pass, stored, job, profile, done, total, and 6 more; every field: acme-crm commands info store status
 
 **Example:** `acme-crm work store status --json`
+
+### `acme-crm store apply`
+
+apply scope mine to the contacts already stored: remove those no deal or lead of the chosen users and no kept company names, and the people they leave empty; counts only unless --yes, under scope all too. A sync that narrows the scope, or sync --rescan under mine, does this itself
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store apply [options]
+```
+
+| Option | What it does |
+|---|---|
+| `--yes` | remove the contacts it counts; otherwise only count them. |
+
+**Returns:** crm contacts removed — contacts, persons, persons_kept, names, applied; every field: acme-crm commands info store apply
+
+**Example:** `acme-crm work store apply`, `acme-crm work store apply --yes`
+
+### `acme-crm store info`
+
+the store file: where it is, its size, its schema against the one this tool speaks, which tools used it and how many rows it holds, by provider, chat kind, account, year (UTC) and attachment kind, over every account; changes nothing
+
+```sh
+acme-crm store info
+```
+
+**Returns:** store info — path, exists, schema, opens, error, bytes, journal_mode, pages, and 12 more; every field: acme-crm commands info store info
+
+**Example:** `acme-crm work store info`
+
+### `acme-crm store check`
+
+whether the store is healthy — integrity, search indexes, disk
+
+```sh
+acme-crm store check
+```
+
+**Returns:** store check — path, exists, ok, opens, error, checks, schema, integrity, and 11 more; every field: acme-crm commands info store check
+
+**Example:** `acme-crm work store check`
+
+### `acme-crm store migrate`
+
+bring the store up to this build's schema, then normalize, index and stem the messages and notes stored before it
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store migrate
+```
+
+**Returns:** store migration — path, exists, from, to, normalized, indexed, terms, stemmed, and 1 more; every field: acme-crm commands info store migrate
+
+**Example:** `acme-crm work store migrate`
+
+### `acme-crm store rebuild`
+
+rebuild the word index, its typo vocabulary, the stems, the files' word index, the notes' indexes and who took part in what, from what is stored, and drop the vectors no stored text uses; loses nothing
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store rebuild
+```
+
+**Returns:** store reindex — path, exists, normalized, indexed, terms, stemmed, notes_indexed, file_texts, and 2 more; every field: acme-crm commands info store rebuild
+
+**Example:** `acme-crm work store rebuild`
+
+### `acme-crm store backup`
+
+copy the store into a new file, while it is in use; never overwrites a file
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store backup <file> [options]
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `file` | required | the new file. |
+
+| Option | What it does |
+|---|---|
+| `--encrypt` | compress and encrypt with a password, typed at a hidden prompt or piped on stdin; it is never kept — lose it and the file cannot be opened. |
+
+**Returns:** store backup — path, from, bytes, schema, rows, encrypted; every field: acme-crm commands info store backup
+
+**Example:** `acme-crm work store backup ./backup.db`
+
+### `acme-crm store restore`
+
+put a backup in place of the store; the store it replaces is kept beside it, never deleted. Given a rollback copy (backups/<store>-rollback-schema-<version>-<time>.db, kept for a day before an upgrade older tools cannot open), put its tables back in the store and return it to that version instead
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store restore <file>
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `file` | required | a file `store backup` wrote, or a rollback copy; one written with --encrypt asks for its password. |
+
+**Returns:** store restore — path, restored_from, kept_at, schema, rolled_back, was, tables, rebuilt, and 1 more; every field: acme-crm commands info store restore
+
+**Example:** `acme-crm work store restore ./backup.db`
+
+### `acme-crm store decrypt`
+
+open a file written with --encrypt into a new file; asks for its password
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store decrypt <file> [options]
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `file` | required | a file `store backup --encrypt` or `store export --encrypt` wrote. |
+
+| Option | What it does |
+|---|---|
+| `--output <file>` | the new file, readable only by you. |
+
+**Returns:** store decrypt — path, from, bytes; every field: acme-crm commands info store decrypt
+
+**Example:** `acme-crm work store decrypt ./backup.enc --output ./restored.db`
+
+### `acme-crm store repair`
+
+bring every table to this build's shape, deleting nothing: a table of the wrong shape is kept as a copy beside a new one
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store repair [options]
+```
+
+| Option | What it does |
+|---|---|
+| `--dry-run` | say what it would do, and change nothing. |
+
+**Returns:** store repair — path, exists, dry_run, repaired, indexes_created, triggers_created, mismatches, foreign_key_violations, and 1 more; every field: acme-crm commands info store repair
+
+**Example:** `acme-crm work store repair --dry-run`
+
+### `acme-crm store reset`
+
+back the store up beside itself, then delete it and start an empty one at this build's schema; asks first, or --yes
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store reset [options]
+```
+
+| Option | What it does |
+|---|---|
+| `--no-backup` | delete the store without backing it up first. |
+| `--dry-run` | list every table it would empty, with its rows, and delete nothing. |
+
+**Returns:** store reset — path, exists, reset, dry_run, files, bytes, schema, tables, and 4 more; every field: acme-crm commands info store reset
+
+**Example:** `acme-crm work store reset`
+
+### `acme-crm store copies`
+
+the tables `store repair` kept as copies
+
+#### `acme-crm store copies delete`
+
+delete one copy `store repair` kept, named exactly; refuses any other table
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store copies delete <name>
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `name` | required | the copy's name, as `store repair` printed it. |
+
+**Returns:** store copy removal — path, deleted; every field: acme-crm commands info store copies delete
+
+**Example:** `acme-crm work store copies delete messages_copy_1`
+
+### `acme-crm store tables`
+
+the tables of the local store
+
+#### `acme-crm store tables list`
+
+every table of the local archive: its kind (data, search index, part of a search index, internal) and its rows, a search index's rows not counted; --full adds each table's size on disk, which reads the whole file (about ten seconds for 3 GB); changes nothing
+
+```sh
+acme-crm store tables list [query]
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `query` | optional | field:value terms that narrow the list — the fields are below. |
+
+**Returns:** store table — name, kind, rows, bytes; every field: acme-crm commands info store tables list
+
+**Example:** `acme-crm personal store tables list`, `acme-crm personal store tables list kind:data`, `acme-crm personal store tables list --full --json`
+
+### `acme-crm store recover`
+
+check every page and search index of the store, say what is damaged, what it means and the commands that recover it; changes nothing
+
+#### `acme-crm store recover run`
+
+copy every readable row into a new file with the sqlite3 program, rebuild the search indexes, mentions and vector index, check it, and put it in place of the store; the damaged file is kept beside it. Refuses while a WireCat timer or process has the store
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm store recover run
+```
+
+**Example:** `acme-crm personal store recover run`
 
 ## `acme-crm deals`
 
@@ -211,23 +428,23 @@ acme-crm deals list [query] [options]
 | `--page <n>` | which page, starting at 1. Default: `1`. |
 | `--format <format>` | csv: this page as a table for a spreadsheet; --json=a,b picks its columns. One of: `csv`. |
 
-**Returns:** deal — id, ref, kind, title, summary, pipeline, pipeline_name, stage, and 24 more; every field: acme-crm commands info deals list
+**Returns:** deal — id, ref, kind, title, summary, pipeline, pipeline_name, stage, and 29 more; every field: acme-crm commands info deals list
 
 **Example:** `acme-crm work deals list status:open --json`, `acme-crm work deals list stage:"Quote sent"`, `acme-crm work deals list status:open --format csv > deals.csv`
 
 ### `acme-crm deals show`
 
-one deal with its pipeline, stage, status, amount and the people on it
+one deal with its pipeline, stage, status, amount and the people on it, and the newest recorded meetings and calls of those people in this account's scope; with the activities setting on, its activities and tasks too
 
 ```sh
-acme-crm deals show <ref>
+acme-crm deals show <deal>
 ```
 
 | Argument | | What it is |
 |---|---|---|
-| `ref` | required | deal:<id>, as a list shows it. |
+| `deal` | required | deal:<id>, as a list shows it. |
 
-**Returns:** deal — id, ref, kind, title, summary, pipeline, pipeline_name, stage, and 24 more; every field: acme-crm commands info deals show
+**Returns:** deal — id, ref, kind, title, summary, pipeline, pipeline_name, stage, and 29 more; every field: acme-crm commands info deals show
 
 **Example:** `acme-crm work deals show deal:12`
 
@@ -320,7 +537,7 @@ search what the local store holds
 
 ### `acme-crm search all`
 
-search the CRM's deals and leads by the words of their title, and messages, notes and calendar events other WireCat tools stored — best match first. Use it when you do not know where something was written
+search the CRM's deals and leads by the words of their title, company, contacts and activities, and the messages, notes, calendar events and meetings other WireCat tools stored — best match first. Use it when you do not know where something was written
 
 ```sh
 acme-crm search all <query> [options]
@@ -328,19 +545,18 @@ acme-crm search all <query> [options]
 
 | Argument | | What it is |
 |---|---|---|
-| `query` | required | words and "phrases"; deals and leads match the words of their title. |
+| `query` | required | words and "phrases"; deals and leads match the words of their title, company, contacts and activities. |
 
 | Option | What it does |
 |---|---|
-| `--only <resources>` | only these resources, separated by commas: crm, messages, notes, events; meetings when --source names a meeting account. |
-| `--source <accounts>` | only these accounts, separated by commas: provider:account as a hit shows it, a provider, a kind or group:<name>; each resource reads the ones of its kind, and meetings only when it names one. |
-| `--max-meetings <n>` | how many of the meeting account's meetings to look through, newest first, or all for every one (default 100). |
+| `--only <resources>` | only these resources, separated by commas: crm, messages, notes, events, meetings. |
+| `--source <accounts>` | only these accounts, separated by commas: provider:account as a hit shows it, a provider, a kind or group:<name>; each resource reads the ones of its kind. |
 | `--limit <n>` | how many. |
 | `--page <n>` | which page, starting at 1. |
 | `--exact` | bare words and quotes match their exact form only, as exact:word does. |
 | `--timezone <zone>` | the IANA timezone for calendar date boundaries. |
 
-**Returns:** hit — kind, ref, provider, account, title, timestamp, excerpt, url, and 15 more; every field: acme-crm commands info search all
+**Returns:** hit — kind, ref, provider, account, title, timestamp, excerpt, url, and 18 more; every field: acme-crm commands info search all
 
 **Example:** `acme-crm work search all Example LLC`, `acme-crm work search all website --only crm --json`
 
@@ -356,9 +572,38 @@ acme-crm doctor [options]
 |---|---|
 | `--online` | also connect once and read the account; sends nothing. |
 
-**Returns:** the state this installation is in, without connecting unless --online
-
 **Example:** `acme-crm doctor`, `acme-crm doctor --json`
+
+### `acme-crm doctor reports`
+
+problem reports
+
+#### `acme-crm doctor reports show`
+
+what a problem report holds; writes nothing
+
+```sh
+acme-crm doctor reports show
+```
+
+**Example:** `acme-crm doctor reports show`
+
+#### `acme-crm doctor reports create`
+
+write a problem report to a file, and say where to send it
+
+**Changes something on this computer only.**
+
+```sh
+acme-crm doctor reports create [options]
+```
+
+| Option | What it does |
+|---|---|
+| `--run <id>` | the run the report is about; the newest failed one if not given. |
+| `--output <file>` | where to write it; a new file in this directory if not given. |
+
+**Example:** `acme-crm doctor reports create --output ./problem-report.json`
 
 ## `acme-crm skill`
 
@@ -376,8 +621,6 @@ acme-crm skill show [options]
 |---|---|
 | `--for <agents>` | print the copy installed for these agents instead of this version's. One of: `claude`, `agents`. |
 
-**Returns:** print the tool's instructions for AI agents
-
 **Example:** `acme-crm skill show`
 
 ### `acme-crm skill install`
@@ -394,8 +637,6 @@ acme-crm skill install [options]
 |---|---|
 | `--for <agents>` | which agents to install for. One of: `claude`, `agents`, `hermes`, `all`. Default: `all`. |
 
-**Returns:** install the tool's instructions for AI agents
-
 **Example:** `acme-crm skill install --for agents`
 
 ### `acme-crm skill status`
@@ -405,8 +646,6 @@ for each place `acme-crm skill install` writes to, and for the copy Hermes reads
 ```sh
 acme-crm skill status
 ```
-
-**Returns:** whether the installed instructions for AI agents match this version
 
 **Example:** `acme-crm skill status`, `acme-crm skill status --json`
 
@@ -432,8 +671,6 @@ acme-crm mcp serve [options]
 | `--port <port>` | the local port for --http (default 8765). |
 | `--public-url <url>` | the tunnel's https address the browser apps use, e.g. https://<name>.ts.net or https://<name>.ts.net/tg. |
 
-**Returns:** serve this profile's commands to an AI agent
-
 **Example:** `acme-crm personal mcp serve`, `acme-crm mcp serve --profiles work,personal`, `acme-crm personal mcp serve --http --public-url https://laptop.example.ts.net`
 
 ### `acme-crm mcp revoke`
@@ -449,8 +686,6 @@ acme-crm mcp revoke [options]
 | Option | What it does |
 |---|---|
 | `--profiles <names\|all>` | serve several profiles from one server instead of one: names, comma-separated, or all for every profile. |
-
-**Returns:** forget every login given to a browser app
 
 **Example:** `acme-crm personal mcp revoke`, `acme-crm mcp revoke --profiles all`
 
@@ -475,8 +710,6 @@ acme-crm mcp server start [options]
 | `--permission <key=level>` | make a permission stricter for this server only; repeat for more keys. |
 | `--profiles <names\|all>` | the server of several profiles that `mcp serve --profiles` serves: names, comma-separated, or all. |
 
-**Returns:** start the HTTP MCP server in the background
-
 **Example:** `acme-crm personal mcp server start --public-url https://laptop.example.ts.net`
 
 #### `acme-crm mcp server stop`
@@ -493,8 +726,6 @@ acme-crm mcp server stop [options]
 |---|---|
 | `--profiles <names\|all>` | the server of several profiles that `mcp serve --profiles` serves: names, comma-separated, or all. |
 
-**Returns:** stop the background HTTP MCP server
-
 **Example:** `acme-crm personal mcp server stop`
 
 #### `acme-crm mcp server status`
@@ -508,8 +739,6 @@ acme-crm mcp server status [options]
 | Option | What it does |
 |---|---|
 | `--profiles <names\|all>` | the server of several profiles that `mcp serve --profiles` serves: names, comma-separated, or all. |
-
-**Returns:** whether the HTTP MCP server runs, its login code and the apps logged in
 
 **Example:** `acme-crm personal mcp server status --json`
 
@@ -525,8 +754,6 @@ acme-crm mcp config [options]
 |---|---|
 | `--permission <key=level>` | make a permission stricter for this server only, like contacts.show=deny; it never loosens the profile; repeat for more keys. |
 | `--profiles <names\|all>` | serve several profiles from one server instead of one: names, comma-separated, or all for every profile. |
-
-**Returns:** print the local MCP configuration of this profile, or of those --profiles names
 
 **Example:** `acme-crm personal mcp config`, `acme-crm mcp config --profiles all`
 
@@ -549,8 +776,6 @@ acme-crm mcp add <client> [options]
 | `--allow-writes` | acknowledge that this profile offers writing tools. |
 | `--permission <key=level>` | make a permission stricter for this server only, like contacts.show=deny; it never loosens the profile; repeat for more keys. |
 
-**Returns:** add this profile's local MCP server to Codex or Claude Code
-
 **Example:** `acme-crm personal mcp add codex --allow-writes`
 
 ### `acme-crm mcp check`
@@ -564,8 +789,6 @@ acme-crm mcp check [options]
 | Option | What it does |
 |---|---|
 | `--permission <key=level>` | make a permission stricter for this server only, like contacts.show=deny; it never loosens the profile; repeat for more keys. |
-
-**Returns:** check this profile's local MCP handshake and tool list
 
 **Example:** `acme-crm personal mcp check`
 
@@ -583,8 +806,6 @@ acme-crm upgrade [options]
 |---|---|
 | `--check` | say whether a newer version exists, and install nothing. |
 
-**Returns:** upgrade acme-crm with the package manager that installed it; --check only looks
-
 **Example:** `acme-crm upgrade --check`
 
 ## `acme-crm config`
@@ -598,8 +819,6 @@ the profile, the profiles that exist, and each setting with where it came from
 ```sh
 acme-crm config show
 ```
-
-**Returns:** the profile, the profiles that exist, and each setting with where it came from
 
 **Example:** `acme-crm personal config show`
 
@@ -615,14 +834,12 @@ acme-crm config set <setting> <value> [options]
 
 | Argument | | What it is |
 |---|---|---|
-| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types. |
+| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, keep_store_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types, crm.<provider>:<account>.scope, crm.<provider>:<account>.unassigned, crm.<provider>:<account>.self, crm.<provider>:<account>.stage-tasks, crm.<provider>:<account>.activities. |
 | `value` | required | a number, true or false; for a group tg:work,max:Alice,email:me@x. |
 
 | Option | What it does |
 |---|---|
 | `--defaults` | change what every profile gets, rather than this profile. |
-
-**Returns:** save a setting to the configuration file
 
 **Example:** `acme-crm personal config set limit 20`
 
@@ -638,13 +855,11 @@ acme-crm config unset <setting> [options]
 
 | Argument | | What it is |
 |---|---|---|
-| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types. |
+| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, keep_store_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types, crm.<provider>:<account>.scope, crm.<provider>:<account>.unassigned, crm.<provider>:<account>.self, crm.<provider>:<account>.stage-tasks, crm.<provider>:<account>.activities. |
 
 | Option | What it does |
 |---|---|
 | `--defaults` | change what every profile gets, rather than this profile. |
-
-**Returns:** remove a setting from the configuration file
 
 **Example:** `acme-crm personal config unset limit`
 
@@ -657,8 +872,6 @@ write each setting the file lacks at its default, keeping yours
 ```sh
 acme-crm config migrate
 ```
-
-**Returns:** write each setting the file lacks at its default, keeping yours
 
 **Example:** `acme-crm config migrate`
 
@@ -675,8 +888,6 @@ acme-crm config repair [options]
 | Option | What it does |
 |---|---|
 | `--dry-run` | say what it would fix, and change nothing. |
-
-**Returns:** fix the settings file's JSON syntax, keeping every value
 
 **Example:** `acme-crm config repair`, `acme-crm config repair --dry-run`
 

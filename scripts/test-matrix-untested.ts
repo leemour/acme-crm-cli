@@ -1,9 +1,41 @@
 const SHARED_MCP =
   "cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs " +
   "this CLI's own server, config, revoke and refusals"
+const SHARED_STORE =
+  "cli-core's addStoreMaintenanceCommands, mounted by addCrmCommands; its store and src/crm/cli/store-file tests " +
+  "drive them on a CRM program"
+const SHARED_REPORTS = "cli-core's appDoctorCommand; its app-mcp-command test creates and shows a report"
 const LONG_RUNNING = `starts an HTTP server or a background process that runs until stopped; ${SHARED_MCP}`
 
 export const UNTESTED: { command: string; option?: string; reason: string }[] = [
+  ...[
+    { command: "store apply" },
+    { command: "store apply", option: "--yes" },
+    { command: "store info" },
+    { command: "store check" },
+    { command: "store migrate" },
+    { command: "store rebuild" },
+    { command: "store backup" },
+    { command: "store backup", option: "--encrypt" },
+    { command: "store restore" },
+    { command: "store decrypt" },
+    { command: "store decrypt", option: "--output" },
+    { command: "store repair" },
+    { command: "store repair", option: "--dry-run" },
+    { command: "store reset" },
+    { command: "store reset", option: "--no-backup" },
+    { command: "store reset", option: "--dry-run" },
+    { command: "store copies delete" },
+    { command: "store tables list" },
+    { command: "store recover" },
+    { command: "store recover run" },
+  ].map((entry) => ({ ...entry, reason: SHARED_STORE })),
+  ...[
+    { command: "doctor reports show" },
+    { command: "doctor reports create" },
+    { command: "doctor reports create", option: "--run" },
+    { command: "doctor reports create", option: "--output" },
+  ].map((entry) => ({ ...entry, reason: SHARED_REPORTS })),
   {
     command: "",
     option: "--help-all",
@@ -50,7 +82,7 @@ export const UNTESTED: { command: string; option?: string; reason: string }[] = 
     ...(option ? { option } : {}),
     reason: `starts the installed CLI as a child process, as the agent would; ${SHARED_MCP}`,
   })),
-  ...["--only", "--source", "--max-meetings", "--limit", "--page", "--exact", "--timezone"].map((option) => ({
+  ...["--only", "--source", "--limit", "--page", "--exact", "--timezone"].map((option) => ({
     command: "search all",
     option,
     reason:
